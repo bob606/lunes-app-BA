@@ -61,6 +61,7 @@ export interface Progress {
 
 export interface NextExercise {
   disciplineId: number
+  disciplineTitle: string
   exerciseKey: number
 }
 

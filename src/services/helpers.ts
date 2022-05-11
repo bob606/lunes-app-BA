@@ -74,6 +74,7 @@ export const getNextExercise = async (profession: Discipline | null): Promise<Ne
     throw new Error(`No Disciplines for id ${profession.id}`)
   }
   const progress = await AsyncStorage.getExerciseProgress()
+
   const doneExercisesOfLeafDiscipline = (disciplineId: number): number => {
     const progressOfDiscipline = progress[disciplineId]
     return progressOfDiscipline
@@ -83,18 +84,29 @@ export const getNextExercise = async (profession: Discipline | null): Promise<Ne
   const firstUnfinishedDiscipline = disciplines.find(
     discipline => doneExercisesOfLeafDiscipline(discipline.id) < exercisesWithProgress
   )
+
   if (!firstUnfinishedDiscipline) {
-    return { disciplineId: disciplines[0].id, exerciseKey: exercisesWithoutProgress } // TODO LUN-319 show success that every exercise is done
+    return {
+      disciplineId: disciplines[0].id,
+      disciplineTitle: disciplines[0].title,
+      exerciseKey: exercisesWithoutProgress
+    } // TODO LUN-319 show success that every exercise is done
   }
   const disciplineProgress = progress[firstUnfinishedDiscipline.id]
   if (!disciplineProgress) {
-    return { disciplineId: firstUnfinishedDiscipline.id, exerciseKey: exercisesWithoutProgress }
+    return {
+      disciplineId: firstUnfinishedDiscipline.id,
+      disciplineTitle: firstUnfinishedDiscipline.title,
+      exerciseKey: exercisesWithoutProgress
+    }
   }
   const nextExerciseKey = EXERCISES.slice(exercisesWithoutProgress).find(
     exercise => disciplineProgress[exercise.key] === undefined
   )
+
   return {
     disciplineId: firstUnfinishedDiscipline.id,
+    disciplineTitle: firstUnfinishedDiscipline.title,
     exerciseKey: nextExerciseKey?.key ?? exercisesWithoutProgress
   }
 }

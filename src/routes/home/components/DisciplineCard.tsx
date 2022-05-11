@@ -68,7 +68,12 @@ const DisciplineCard = (props: PropsType): ReactElement => {
 
   const navigate = () => {
     if (documents !== null && nextExercise !== null) {
-      navigateToNextExercise(nextExercise.disciplineId, nextExercise.exerciseKey, '', documents) // TODO set discipline title correct LUN-320
+      navigateToNextExercise(
+        nextExercise.disciplineId,
+        nextExercise.exerciseKey,
+        nextExercise.disciplineTitle,
+        documents
+      )
     }
   }
 
