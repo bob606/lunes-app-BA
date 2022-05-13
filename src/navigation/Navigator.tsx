@@ -47,7 +47,7 @@ const styles = (headerHeight?: number) =>
       height: headerHeight
     },
     headerRightContainer: {
-      paddingHorizontal: wp('4%'),
+      paddingHorizontal: wp('4%')*0.66,
       maxWidth: 60
     },
     headerLeftContainer: {
@@ -66,7 +66,7 @@ const Navigator = (): JSX.Element | null => {
   const [isHomeButtonPressed, setIsHomeButtonPressed] = useState<boolean>(false)
 
   // Set only height for tablets since header doesn't scale auto
-  const headerHeight = useTabletHeaderHeight(wp('15%'))
+  const headerHeight = useTabletHeaderHeight(wp('15%')*0.66)
   const { data: professions, loading } = useReadSelectedProfessions()
 
   const theme = useTheme()
@@ -85,9 +85,9 @@ const Navigator = (): JSX.Element | null => {
         onPressOut={() => setIsPressed(false)}
         activeOpacity={1}>
         {isPressed ? (
-          <ArrowLeftCircleIconBlue width={wp('7%')} height={wp('7%')} />
+          <ArrowLeftCircleIconBlue width={wp('7%')*0.66} height={wp('7%')*0.66} />
         ) : (
-          <Icon width={wp('7%')} height={wp('7%')} />
+          <Icon width={wp('7%')*0.66} height={wp('7%')*0.66} />
         )}
         <NavigationTitle numberOfLines={2}>{title}</NavigationTitle>
       </NavigationHeaderLeft>
@@ -100,9 +100,9 @@ const Navigator = (): JSX.Element | null => {
           onPressOut={() => setIsHomeButtonPressed(false)}
           activeOpacity={1}>
           {isHomeButtonPressed ? (
-            <HomeCircleIconBlue width={wp('7%')} height={wp('7%')} />
+            <HomeCircleIconBlue width={wp('7%')*0.66} height={wp('7%')*0.66} />
           ) : (
-            <HomeCircleIconWhite width={wp('7%')} height={wp('7%')} />
+            <HomeCircleIconWhite width={wp('7%')*0.66} height={wp('7%')*0.66} />
           )}
         </TouchableOpacity>
       )

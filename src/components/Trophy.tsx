@@ -21,7 +21,7 @@ interface PropsType {
 const Trophy = ({ level }: PropsType): ReactElement => {
   const trophies = []
   for (let i = 0; i < level; i += 1) {
-    trophies.push(<TrophyIconStyled key={`trophy-${i}`} testID={`trophy-${i}`} width={wp('3%')} height={hp('3%')} />)
+    trophies.push(<TrophyIconStyled key={`trophy-${i}`} testID={`trophy-${i}`} width={wp('3%')*0.66} height={hp('3%')*0.66} />)
   }
   return <TrophyContainer>{trophies}</TrophyContainer>
 }

@@ -119,7 +119,7 @@ const AddCustomDiscipline = ({ navigation }: AddCustomDisciplineScreenProps): JS
               onChangeText={setCode}
             />
             <TouchableOpacity onPress={() => setShowQRCodeOverlay(true)}>
-              <QRCodeIcon accessibilityLabel='qr-code-scanner' width={wp('6%')} height={wp('6%')} />
+              <QRCodeIcon accessibilityLabel='qr-code-scanner' width={wp('6%')*0.66} height={wp('6%')*0.66} />
             </TouchableOpacity>
           </InputContainer>
 

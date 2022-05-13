@@ -33,13 +33,13 @@ const ExerciseHeader = ({ navigation, currentWord, numberOfWords }: ExerciseHead
       navigation.setOptions({
         headerLeft: () => (
           <NavigationHeaderLeft onPress={() => setIsModalVisible(true)}>
-            <CloseCircleIconWhite width={wp('7%')} height={wp('7%')} />
+            <CloseCircleIconWhite width={wp('7%')*0.66} height={wp('7%')*0.66} />
             <NavigationTitle>{labels.general.header.cancelExercise}</NavigationTitle>
           </NavigationHeaderLeft>
         ),
         headerRight: () => <ContentSecondary>{progressText}</ContentSecondary>,
         headerRightContainerStyle: {
-          paddingHorizontal: wp('4%'),
+          paddingHorizontal: wp('4%')*0.66,
           maxWidth: wp('25%')
         }
       }),

@@ -10,8 +10,8 @@ import { getArticleColor } from '../../../services/helpers'
 
 const StyledImage = styled.Image`
   margin-right: ${props => props.theme.spacings.sm};
-  width: ${wp('15%')}px;
-  height: ${wp('15%')}px;
+  width: ${wp('15%')*0.66}px;
+  height: ${wp('15%')*0.66}px;
   border-radius: ${props => props.theme.spacings.xxl};
 `
 const StyledTitle = styled(ContentTextLight)<{ articleColor: string }>`
@@ -19,9 +19,9 @@ const StyledTitle = styled(ContentTextLight)<{ articleColor: string }>`
   margin-bottom: ${props => props.theme.spacings.xxs};
   background-color: ${props => props.articleColor};
   align-self: flex-start;
-  width: ${wp('10%')}px;
+  width: ${wp('10%')*0.66}px;
   overflow: hidden;
-  height: ${wp('5%')}px;
+  height: ${wp('5%')*0.66}px;
   text-align: center;
 `
 const Speaker = styled.View`

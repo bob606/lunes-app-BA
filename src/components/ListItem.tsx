@@ -37,8 +37,8 @@ const Title = styled.Text<{ pressed: boolean }>`
 `
 
 const Icon = styled.Image`
-  width: ${wp('7%')}px;
-  height: ${wp('7%')}px;
+  width: ${wp('7%')*0.66}px;
+  height: ${wp('7%')*0.66}px;
 `
 
 const IconContainer = styled.View`
@@ -62,11 +62,12 @@ const Description = styled(ContentSecondaryLight)<{ pressed: boolean }>`
 const BadgeLabel = styled.Text<{ pressed: boolean }>`
   font-family: ${props => props.theme.fonts.contentFontBold};
   font-weight: ${props => props.theme.fonts.defaultFontWeight};
-  min-width: ${wp('6%')}px;
-  height: ${wp('4%')}px;
+  min-width: ${wp('6%')*0.66}px;
+  height: ${wp('4%')*0.66}px;
   border-radius: 8px;
   overflow: hidden;
   text-align: center;
+  padding-top: 2px;
   color: ${prop => (prop.pressed ? prop.theme.colors.textSecondary : prop.theme.colors.background)};
   background-color: ${prop => (prop.pressed ? prop.theme.colors.backgroundAccent : prop.theme.colors.textSecondary)};
   font-size: ${prop => prop.theme.fonts.smallFontSize};
@@ -141,8 +142,8 @@ const ListItem = ({
     <ChevronRight
       fill={pressed ? theme.colors.buttonSelectedSecondary : theme.colors.primary}
       testID='arrow'
-      width={wp('6%')}
-      height={hp('6%')}
+      width={wp('6%')*0.66}
+      height={hp('6%')*0.66}
     />
   )
 

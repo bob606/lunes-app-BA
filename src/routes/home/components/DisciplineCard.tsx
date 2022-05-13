@@ -1,5 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native'
 import React, { ReactElement, useEffect, useState } from 'react'
+import { useWindowDimensions } from 'react-native'
 import * as Progress from 'react-native-progress'
 import styled from 'styled-components/native'
 
@@ -94,7 +95,7 @@ const DisciplineCard = (props: PropsType): ReactElement => {
   }
 
   return (
-    <Card heading={discipline.title} icon={discipline.icon} >
+    <Card heading={discipline.title} icon={discipline.icon}>
       <>
         <ProgressContainer>
           <Progress.Circle

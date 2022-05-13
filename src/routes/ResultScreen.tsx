@@ -68,7 +68,7 @@ const ResultScreen = ({ navigation, route }: Props): ReactElement => {
   const { level, description, title } = EXERCISES[exercise]
 
   // Set only height for tablets since header doesn't scale auto
-  const headerHeight = useTabletHeaderHeight(wp('15%'))
+  const headerHeight = useTabletHeaderHeight(wp('15%')*0.66)
 
   const repeatExercise = (): void => {
     navigation.navigate(EXERCISES[exercise].screen, {
@@ -84,7 +84,7 @@ const ResultScreen = ({ navigation, route }: Props): ReactElement => {
       headerRight: () => (
         <RightHeader onPress={() => navigation.dispatch(closeExerciseAction)}>
           <HeaderText>{labels.general.header.cancelExercise}</HeaderText>
-          <DoubleCheckIcon width={wp('6%')} height={wp('6%')} />
+          <DoubleCheckIcon width={wp('6%')*0.66} height={wp('6%')*0.66} />
         </RightHeader>
       ),
       headerRightContainerStyle: { flex: 1 },
@@ -118,7 +118,7 @@ const ResultScreen = ({ navigation, route }: Props): ReactElement => {
     const count = results.filter(it => it.result === item.key).length
 
     const description = `${count} ${labels.results.of} ${results.length} ${labels.general.words}`
-    const icon = <item.Icon width={wp('7%')} height={wp('7%')} />
+    const icon = <item.Icon width={wp('7%')*0.66} height={wp('7%')*0.66} />
 
     return <ListItem title={item.title} icon={icon} description={description} onPress={() => navigateToResult(item)} />
   }

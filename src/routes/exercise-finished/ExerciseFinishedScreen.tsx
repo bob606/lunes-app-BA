@@ -73,7 +73,7 @@ const ExerciseFinishedScreen = ({ navigation, route }: Props): ReactElement => {
   return (
     <Root>
       <UpperSection>
-        <CheckCircleIconWhite width={wp('8%')} height={wp('8%')} />
+        <CheckCircleIconWhite width={wp('8%')*0.66} height={wp('8%')*0.66} />
         <MessageContainer>
           <Message>{message}</Message>
         </MessageContainer>

@@ -64,7 +64,7 @@ const VocabularyListModal = ({
       <ModalContainer>
         <SafeAreaView>
           <ModalHeader>
-            <CloseCircleIconWhite onPress={() => setIsModalVisible(false)} width={wp('7%')} height={wp('7%')} />
+            <CloseCircleIconWhite onPress={() => setIsModalVisible(false)} width={wp('7%')*0.66} height={wp('7%')*0.66} />
           </ModalHeader>
           <ImageCarousel images={documents[selectedDocumentIndex].document_image} />
           <AudioPlayer document={documents[selectedDocumentIndex]} disabled={false} />

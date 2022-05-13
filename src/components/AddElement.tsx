@@ -34,7 +34,7 @@ interface Props {
 const AddElement = ({ onPress, label, explanation }: Props): ReactElement => (
   <Root onPress={onPress}>
     <FlexRow>
-      <AddCircleIcon width={wp('8%')} height={wp('8%')} />
+      <AddCircleIcon width={wp('8%')*0.66} height={wp('8%')*0.66} />
       <AddCustomDisciplineText>{label}</AddCustomDisciplineText>
     </FlexRow>
     {explanation && <Explanation>{explanation}</Explanation>}

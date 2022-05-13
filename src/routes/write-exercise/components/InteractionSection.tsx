@@ -155,7 +155,7 @@ const InteractionSection = (props: InteractionSectionProps): ReactElement => {
         />
         {retryAllowed && input !== '' && (
           <TouchableOpacity onPress={() => setInput('')}>
-            <CloseIcon width={wp('6%')} height={wp('6%')} />
+            <CloseIcon width={wp('6%')*0.66} height={wp('6%')*0.66} />
           </TouchableOpacity>
         )}
       </TextInputContainer>

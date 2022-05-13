@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import styled from 'styled-components/native'
 
 import { ArrowRightCircleIconWhite } from '../../../../assets/images'
@@ -38,14 +38,15 @@ const Label = styled(SubheadingPrimary)`
 `
 
 const Thumbnail = styled.Image`
-  height: ${wp('19%')}px;
-  width: ${wp('18%')}px;
+  height: ${hp('9.5%')}px;
+  width: ${hp('9%')}px;
   align-self: center;
 `
 
 const Heading = styled(SubheadingText)`
-  font-size: ${props => props.theme.fonts.smallFontSize};
+font-size: ${props => props.theme.fonts.smallFontSize};
 `
+
 const Subheading = styled(ContentTextLight)`
   font-size: ${props => props.theme.fonts.smallFontSize};
 `
@@ -69,11 +70,11 @@ const NextExerciseCard: React.FC<NextExerciseCardProps> = ({
     <Thumbnail source={{ uri: thumbnail }} />
     <ExerciseDetail>
       <Heading>{heading}</Heading>
-      <Subheading>{subheading}</Subheading>
+      <Subheading >{subheading}</Subheading>
       <ActionContainer>
         <TouchableOpacity style={{ flexDirection: 'row' }} onPress={onPress} testID='nextExerciseButton'>
           <Label>{buttonLabel}</Label>
-          <ArrowRightCircleIconWhite width={wp('8%')} height={wp('8%')} />
+          <ArrowRightCircleIconWhite width={hp('4%')} height={hp('4%')} />
         </TouchableOpacity>
       </ActionContainer>
     </ExerciseDetail>

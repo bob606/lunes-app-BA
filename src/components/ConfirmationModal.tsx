@@ -27,8 +27,8 @@ const Icon = styled.TouchableOpacity`
   position: absolute;
   top: 8px;
   right: 8px;
-  width: ${wp('6%')}px;
-  height: ${wp('6%')}px;
+  width: ${wp('6%')*0.66}px;
+  height: ${wp('6%')*0.66}px;
 `
 const Message = styled(HeadingText)`
   width: ${wp('60%')}px;
@@ -55,7 +55,7 @@ const ConfirmationModal = (props: ConfirmationModalProps): JSX.Element => {
       <Overlay>
         <ModalContainer>
           <Icon onPress={closeModal}>
-            <CloseIcon width={wp('6%')} height={wp('6%')} />
+            <CloseIcon width={wp('6%')*0.66} height={wp('6%')*0.66} />
           </Icon>
           <Message>{text}</Message>
           <Button label={cancelButtonText} onPress={closeModal} buttonTheme={BUTTONS_THEME.contained} />
