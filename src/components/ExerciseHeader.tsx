@@ -65,13 +65,20 @@ const ExerciseHeader = ({
   const progressText = showProgress ? `${currentWord + 1} / ${numberOfWords}` : ''
 
   useEffect(() => {
-    const renderHeaderLeft = () => (
-      <NavigationHeaderLeft
-        title={labelOverride ?? getLabels().general.header.cancelExercise}
-        onPress={confirmClose ? () => setIsModalVisible(true) : () => navigation.dispatch(closeExerciseAction)}
-        isCloseButton={isCloseButton}
-      />
-    )
+    const renderHeaderLeft = () =>
+      numberOfWords === (currentWord ?? 0) + 1 ? (
+        <NavigationHeaderLeft
+          title={labelOverride ?? getLabels().results.action.backToWordlist}
+          onPress={navigation.goBack}
+          isCloseButton={isCloseButton}
+        />
+      ) : (
+        <NavigationHeaderLeft
+          title={labelOverride ?? getLabels().general.header.cancelExercise}
+          onPress={confirmClose ? () => setIsModalVisible(true) : () => navigation.dispatch(closeExerciseAction)}
+          isCloseButton={isCloseButton}
+        />
+      )
 
     const renderHeaderRight = () => (
       <HeaderRightContainer>
@@ -101,6 +108,8 @@ const ExerciseHeader = ({
     setIsModalVisible,
     setIsFeedbackModalVisible,
     confirmClose,
+    currentWord,
+    numberOfWords,
     closeExerciseAction,
     labelOverride,
     isCloseButton,

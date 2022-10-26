@@ -37,7 +37,6 @@ const VocabularyDetailExerciseScreen = ({ route, navigation }: VocabularyDetailE
   const hasNextDocument = documentIndex + 1 < documents.length
   const closeExerciseLabel = labelOverrides?.closeExerciseButtonLabel ?? getLabels().results.action.backToWordlist
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false)
-
   const goToNextWord = () =>
     navigation.navigate('VocabularyDetailExercise', { ...route.params, documentIndex: documentIndex + 1 })
 
