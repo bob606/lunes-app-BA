@@ -27,7 +27,6 @@ const LoadingContainer = styled(View)`
 const SelectionItem = ({ identifier, deleteItem }: SelectionItemProps): JSX.Element => {
   const { data, loading, error } = useLoadDiscipline(identifier)
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-
   if (loading) {
     return (
       <LoadingContainer>
@@ -50,6 +49,7 @@ const SelectionItem = ({ identifier, deleteItem }: SelectionItemProps): JSX.Elem
             ? `${getLabels().home.errorLoadCustomDiscipline} ${identifier.apiKey}`
             : getLabels().general.error.unknown)
         }
+        icon={data?.icon}
         rightChildren={
           <CloseIconContainer onPress={() => setIsModalVisible(true)} testID='delete-icon'>
             <CloseIconRed />

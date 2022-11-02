@@ -5,6 +5,8 @@ export const Heading = styled.Text<{ centered?: boolean }>`
   font-family: ${props => props.theme.fonts.contentFontBold};
   font-weight: ${props => props.theme.fonts.defaultFontWeight};
   ${props => (props.centered ? 'align-self: center;' : '')};
+  text-align: center;
+  margin-bottom: 20px;
 `
 
 export const HeadingText = styled(Heading)`
