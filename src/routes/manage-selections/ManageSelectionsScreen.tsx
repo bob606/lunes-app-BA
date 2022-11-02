@@ -24,6 +24,7 @@ const Root = styled.ScrollView`
 
 const SectionHeading = styled(Subheading)`
   padding-top: ${props => props.theme.spacings.xl};
+  font-family: ${props => props.theme.fonts.contentFontBold};
 `
 
 const Padding = styled.View`
@@ -37,7 +38,6 @@ interface ManageSelectionScreenProps {
 const ManageSelectionsScreen = ({ navigation }: ManageSelectionScreenProps): ReactElement => {
   const { data: selectedProfessions, refresh: refreshSelectedProfessions } = useReadSelectedProfessions()
   const { data: customDisciplines, refresh: refreshCustomDisciplines } = useReadCustomDisciplines()
-
   useFocusEffect(refreshCustomDisciplines)
   useFocusEffect(refreshSelectedProfessions)
 

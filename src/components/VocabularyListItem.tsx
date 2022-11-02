@@ -50,7 +50,6 @@ const VocabularyListItem = ({
 }: VocabularyListItemProps): ReactElement => {
   const { article, word, images } = vocabularyItem
   const theme = useTheme()
-
   const title = <StyledTitle articleColor={getArticleColor(article)}>{article.value}</StyledTitle>
   const icon =
     images.length > 0 ? (
