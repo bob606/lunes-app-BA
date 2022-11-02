@@ -113,6 +113,7 @@ const ExerciseHeader = ({
     setIsFeedbackModalVisible,
     confirmClose,
     currentWord,
+    isLastWordInList,
     numberOfWords,
     closeExerciseAction,
     labelOverride,
