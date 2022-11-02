@@ -8,7 +8,7 @@ import { HiddenItem } from 'react-navigation-header-buttons'
 import styled, { useTheme } from 'styled-components/native'
 
 import { MenuIcon } from '../../assets/images'
-import { FeedbackType } from '../constants/data'
+import { ExerciseKey, FeedbackType } from '../constants/data'
 import { Route, RoutesParams } from '../navigation/NavigationTypes'
 import { getLabels } from '../services/helpers'
 import FeedbackModal from './FeedbackModal'
@@ -38,6 +38,7 @@ const StyledMenuIcon = styled(MenuIcon)`
 interface ExerciseHeaderProps {
   navigation: StackNavigationProp<RoutesParams, Route>
   closeExerciseAction: CommonNavigationAction
+  exerciseKey?: ExerciseKey
   feedbackType: FeedbackType
   feedbackForId: number
   currentWord?: number
@@ -57,16 +58,17 @@ const ExerciseHeader = ({
   confirmClose = true,
   labelOverride,
   isCloseButton = true,
+  exerciseKey,
 }: ExerciseHeaderProps): JSX.Element => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false)
   const theme = useTheme()
   const showProgress = numberOfWords !== undefined && numberOfWords > 0 && currentWord !== undefined
   const progressText = showProgress ? `${currentWord + 1} / ${numberOfWords}` : ''
-
+  const isWordList = exerciseKey === 0 || exerciseKey === undefined
   useEffect(() => {
     const renderHeaderLeft = () =>
-      numberOfWords === (currentWord ?? 0) + 1 ? (
+      isWordList && numberOfWords === (currentWord ?? 0) + 1 ? (
         <NavigationHeaderLeft
           title={labelOverride ?? getLabels().results.action.backToWordlist}
           onPress={navigation.goBack}
@@ -109,6 +111,7 @@ const ExerciseHeader = ({
     setIsFeedbackModalVisible,
     confirmClose,
     currentWord,
+    isWordList,
     numberOfWords,
     closeExerciseAction,
     labelOverride,

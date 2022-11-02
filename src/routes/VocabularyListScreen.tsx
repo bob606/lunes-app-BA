@@ -18,11 +18,9 @@ interface VocabularyListScreenProps {
 
 const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps): JSX.Element => {
   const { disciplineId, closeExerciseAction } = route.params
-
   useEffect(() => {
     setExerciseProgress(disciplineId, ExerciseKeys.vocabularyList, 1).catch(reportError)
   }, [disciplineId])
-
   const onItemPress = (index: number) =>
     navigation.navigate('VocabularyDetailExercise', { ...route.params, documentIndex: index })
   return (
@@ -33,6 +31,7 @@ const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps):
         closeExerciseAction={closeExerciseAction}
         feedbackType={FeedbackType.leaf_discipline}
         feedbackForId={disciplineId}
+        exerciseKey={ExerciseKeys.vocabularyList}
       />
       <VocabularyList
         documents={route.params.documents}

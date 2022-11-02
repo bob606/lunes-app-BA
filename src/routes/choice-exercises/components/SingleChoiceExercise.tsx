@@ -59,7 +59,6 @@ const ChoiceExerciseScreen = ({
   )
   const { document, numberOfTries, result } = results[currentWord]
   const [answers, setAnswers] = useState<Answer[]>(documentToAnswers(document))
-
   const correctAnswers = [{ word: document.word, article: document.article }, ...document.alternatives]
   const needsToBeRepeated = numberOfTries < numberOfMaxRetries && result === SIMPLE_RESULTS.incorrect
 
@@ -149,6 +148,7 @@ const ChoiceExerciseScreen = ({
         numberOfWords={count}
         feedbackType={FeedbackType.document}
         feedbackForId={document.id}
+        exerciseKey={exerciseKey}
       />
 
       <>
