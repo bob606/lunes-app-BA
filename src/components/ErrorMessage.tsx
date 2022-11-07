@@ -29,6 +29,7 @@ const ErrorTitle = styled.Text`
 export const ErrorText = styled(Content)<{ centered?: boolean }>`
   padding: ${props => `${props.theme.spacings.md} ${props.theme.spacings.xl}`};
   text-align: ${props => (props.centered ? 'center' : 'left')};
+  margin-bottom: ${props => ` ${props.theme.spacings.xs}`};
 `
 const NetworkErrorWrapper = styled.View`
   background-color: ${prop => prop.theme.colors.background};
@@ -65,7 +66,7 @@ const ErrorMessage = ({ error, refresh, contained }: ErrorMessageProps): JSX.Ele
 
   return (
     <NetworkErrorWrapper>
-      <RoundedBackground color={theme.colors.networkErrorBackground} height='67%'>
+      <RoundedBackground color={theme.colors.networkErrorBackground} height='67%' bottom={theme.spacings.xs}>
         <Container>
           {error.message === NetworkError && (
             <IconStyle>
