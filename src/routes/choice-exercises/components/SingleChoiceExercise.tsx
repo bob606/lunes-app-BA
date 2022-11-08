@@ -12,6 +12,7 @@ import {
   Answer,
   BUTTONS_THEME,
   ExerciseKey,
+  ExerciseKeys,
   FeedbackType,
   numberOfMaxRetries,
   SIMPLE_RESULTS,
@@ -148,7 +149,7 @@ const ChoiceExerciseScreen = ({
         numberOfWords={count}
         feedbackType={FeedbackType.document}
         feedbackForId={document.id}
-        exerciseKey={exerciseKey}
+        exerciseKey={ExerciseKeys.wordChoiceExercise}
       />
 
       <>

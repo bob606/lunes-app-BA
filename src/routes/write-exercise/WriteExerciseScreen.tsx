@@ -134,6 +134,7 @@ const WriteExerciseScreen = ({ route, navigation }: WriteExerciseScreenProps): R
           closeExerciseAction={closeExerciseAction}
           feedbackType={FeedbackType.document}
           feedbackForId={documents[currentIndex].id}
+          exerciseKey={ExerciseKeys.writeExercise}
         />
 
         <InteractionSection

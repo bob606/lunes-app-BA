@@ -23,7 +23,6 @@ const ArticleChoiceExerciseScreen = ({ navigation, route }: ArticleChoiceExercis
 
   const documentToAnswers = (document: Document): Answer[] =>
     answerOptions.map(article => ({ article, word: document.word }))
-
   return (
     <RouteWrapper>
       <SingleChoiceExercise
