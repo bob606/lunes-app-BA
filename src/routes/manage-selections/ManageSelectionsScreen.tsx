@@ -66,7 +66,7 @@ const ManageSelectionsScreen = ({ navigation }: ManageSelectionScreenProps): Rea
   return (
     <RouteWrapper>
       <Root contentContainerStyle={{ flexGrow: 1 }}>
-        <Heading>{getLabels().manageSelection.heading}</Heading>
+        <Heading style={{ textAlign: 'center' }}>{getLabels().manageSelection.heading}</Heading>
         <SectionHeading>{getLabels().manageSelection.yourProfessions}</SectionHeading>
         <HorizontalLine />
         {professionItems}
