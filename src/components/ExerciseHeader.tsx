@@ -114,6 +114,7 @@ const ExerciseHeader = ({
     confirmClose,
     currentWord,
     isLastWordInList,
+    exerciseKey,
     numberOfWords,
     closeExerciseAction,
     labelOverride,
