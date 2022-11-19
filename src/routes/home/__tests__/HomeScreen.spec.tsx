@@ -7,7 +7,7 @@ import { useLoadDisciplines } from '../../../hooks/useLoadDisciplines'
 import useReadCustomDisciplines from '../../../hooks/useReadCustomDisciplines'
 import useReadProgress from '../../../hooks/useReadProgress'
 import useReadSelectedProfessions from '../../../hooks/useReadSelectedProfessions'
-import AsyncStorage from '../../../services/AsyncStorage'
+import { setCustomDisciplines } from '../../../services/AsyncStorage'
 import { getLabels } from '../../../services/helpers'
 import createNavigationMock from '../../../testing/createNavigationPropMock'
 import { getReturnOf } from '../../../testing/helper'
@@ -40,16 +40,19 @@ describe('HomeScreen', () => {
     mocked(useLoadDiscipline)
       .mockReturnValueOnce(getReturnOf(mockDisciplines()[0]))
       .mockReturnValueOnce(getReturnOf(mockDisciplines()[1]))
+      .mockReturnValueOnce(getReturnOf(mockDisciplines()[2]))
     mocked(useReadProgress).mockReturnValue(getReturnOf(0))
     const { findByText, getByText } = render(<HomeScreen navigation={navigation} />)
     const firstDiscipline = await findByText('First Discipline')
-    const secondDiscipline = getByText('Second Discipline')
+    const secondDiscipline = await findByText('Second Discipline')
+    const thirdDiscipline = getByText('Third Discipline')
     expect(firstDiscipline).toBeDefined()
     expect(secondDiscipline).toBeDefined()
+    expect(thirdDiscipline).toBeDefined()
   })
 
   it('should render custom discipline', async () => {
-    await AsyncStorage.setCustomDisciplines(['test'])
+    await setCustomDisciplines(['test'])
     mocked(useLoadDisciplines).mockReturnValueOnce(getReturnOf(mockDisciplines()))
     mocked(useReadCustomDisciplines).mockReturnValue(getReturnOf(['abc']))
     mocked(useReadSelectedProfessions).mockReturnValue(getReturnOf([]))

@@ -1,7 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack'
 import React, { ReactElement } from 'react'
 
-import DictionaryDetailScreen from '../routes/DictionaryDetailScreen'
+import VocabularyDetailScreen from '../routes/VocabularyDetailScreen'
 import DictionaryScreen from '../routes/dictionary/DictionaryScreen'
 import { getLabels } from '../services/helpers'
 import { RoutesParams } from './NavigationTypes'
@@ -21,8 +21,8 @@ const DictionaryStackNavigator = (): ReactElement => {
         options={({ navigation }) => options(back, navigation)}
       />
       <Stack.Screen
-        name='DictionaryDetail'
-        component={DictionaryDetailScreen}
+        name='VocabularyDetail'
+        component={VocabularyDetailScreen}
         options={({ navigation }) => options(back, navigation)}
       />
     </Stack.Navigator>

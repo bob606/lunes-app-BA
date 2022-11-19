@@ -1,24 +1,23 @@
 import React, { ReactElement, useCallback, useState, useEffect } from 'react'
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import SoundPlayer from 'react-native-sound-player'
 import Tts, { TtsError } from 'react-native-tts'
-import styled from 'styled-components/native'
+import styled, { useTheme } from 'styled-components/native'
 
 import { VolumeUpCircleIcon } from '../../assets/images'
-import { Document } from '../constants/endpoints'
-import { stringifyDocument } from '../services/helpers'
+import { VocabularyItem } from '../constants/endpoints'
+import { stringifyVocabularyItem } from '../services/helpers'
 import PressableOpacity from './PressableOpacity'
 
 export interface AudioPlayerProps {
-  document: Document
+  vocabularyItem: VocabularyItem
   disabled: boolean
-  // If the user submitted a correct alternative (differing enough to the document), we want to play the alternative
+  // If the user submitted a correct alternative (differing enough to the vocabularyItem), we want to play the alternative
   submittedAlternative?: string | null
 }
 
 const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean }>`
-  width: ${wp('9%')}px;
-  height: ${wp('9%')}px;
+  width: ${props => props.theme.spacings.lg};
+  height: ${props => props.theme.spacings.lg};
   border-radius: 50px;
   background-color: ${props => {
     if (props.disabled) {
@@ -38,8 +37,9 @@ const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boole
   shadow-opacity: 0.5;
 `
 
-const AudioPlayer = ({ document, disabled, submittedAlternative }: AudioPlayerProps): ReactElement => {
-  const { audio } = document
+const AudioPlayer = ({ vocabularyItem, disabled, submittedAlternative }: AudioPlayerProps): ReactElement => {
+  const { audio } = vocabularyItem
+  const theme = useTheme()
   const [isInitialized, setIsInitialized] = useState<boolean>(false)
   const [isActive, setIsActive] = useState(false)
 
@@ -54,8 +54,10 @@ const AudioPlayer = ({ document, disabled, submittedAlternative }: AudioPlayerPr
         }
       })
       .catch(async (error: TtsError) => {
+        /* eslint-disable-next-line no-console */
         console.error(`Tts-Error: ${error.code}`)
         if (error.code === 'no_engine') {
+          /* eslint-disable-next-line no-console */
           await Tts.requestInstallEngine().catch(e => console.error('Failed to install tts engine: ', e))
         }
       })
@@ -89,7 +91,7 @@ const AudioPlayer = ({ document, disabled, submittedAlternative }: AudioPlayerPr
         SoundPlayer.loadUrl(audio)
       } else {
         // @ts-expect-error ios params should be optional
-        Tts.speak(submittedAlternative ?? stringifyDocument(document), {
+        Tts.speak(submittedAlternative ?? stringifyVocabularyItem(vocabularyItem), {
           androidParams: {
             KEY_PARAM_PAN: 0,
             KEY_PARAM_VOLUME: 0.5,
@@ -106,7 +108,7 @@ const AudioPlayer = ({ document, disabled, submittedAlternative }: AudioPlayerPr
       isActive={isActive}
       onPress={handleSpeakerClick}
       testID='audio-player'>
-      <VolumeUpCircleIcon width={wp('8%')} height={wp('8%')} />
+      <VolumeUpCircleIcon width={theme.spacingsPlain.lg} height={theme.spacingsPlain.lg} />
     </VolumeIcon>
   )
 }

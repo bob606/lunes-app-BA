@@ -1,16 +1,28 @@
 import { AxiosResponse } from 'axios'
+import normalizeStrings from 'normalize-strings'
+import { readFile } from 'react-native-fs'
 
-import { Article, EXERCISES, FeedbackType, NextExercise, Progress } from '../constants/data'
-import { AlternativeWord, Discipline, Document, ENDPOINTS } from '../constants/endpoints'
+import {
+  Article,
+  ARTICLES,
+  EXERCISES,
+  FeedbackType,
+  NextExercise,
+  Progress,
+  SCORE_THRESHOLD_UNLOCK,
+} from '../constants/data'
+import { AlternativeWord, Discipline, VocabularyItem, ENDPOINTS, Image, Images } from '../constants/endpoints'
 import labels from '../constants/labels.json'
 import { COLORS } from '../constants/theme/colors'
 import { ServerResponseDiscipline } from '../hooks/helpers'
 import { loadDiscipline } from '../hooks/useLoadDiscipline'
-import { DocumentResult } from '../navigation/NavigationTypes'
-import AsyncStorage from './AsyncStorage'
+import { VocabularyItemResult } from '../navigation/NavigationTypes'
+import { getExerciseProgress } from './AsyncStorage'
 import { getFromEndpoint, postToEndpoint } from './axios'
+import { reportError } from './sentry'
 
-export const stringifyDocument = ({ article, word }: Document | AlternativeWord): string => `${article.value} ${word}`
+export const stringifyVocabularyItem = ({ article, word }: VocabularyItem | AlternativeWord): string =>
+  `${article.value} ${word}`
 
 export const getArticleColor = (article: Article): string => {
   switch (article.id) {
@@ -32,10 +44,10 @@ export const getArticleColor = (article: Article): string => {
 }
 
 export const moveToEnd = <T>(array: T[], index: number): T[] => {
-  const currDocument = array[index]
-  const newDocuments = array.filter(d => d !== currDocument)
-  newDocuments.push(currDocument)
-  return newDocuments
+  const currentItem = array[index]
+  const newItems = array.filter(it => it !== currentItem)
+  newItems.push(currentItem)
+  return newItems
 }
 
 export const wordsDescription = (numberOfChildren: number): string =>
@@ -72,7 +84,7 @@ const getDoneExercisesByProgress = (disciplineId: number, progress: Progress): n
 }
 
 export const getDoneExercises = (disciplineId: number): Promise<number> =>
-  AsyncStorage.getExerciseProgress().then(progress => getDoneExercisesByProgress(disciplineId, progress))
+  getExerciseProgress().then(progress => getDoneExercisesByProgress(disciplineId, progress))
 
 /*
   Calculates the next exercise that needs to be done for a profession (= second level discipline of lunes standard vocabulary)
@@ -86,7 +98,7 @@ export const getNextExercise = async (profession: Discipline): Promise<NextExerc
   if (!leafDisciplineIds?.length) {
     throw new Error(`No Disciplines for id ${profession.id}`)
   }
-  const progress = await AsyncStorage.getExerciseProgress()
+  const progress = await getExerciseProgress()
   const firstUnfinishedDisciplineId = leafDisciplineIds.find(
     id => getDoneExercisesByProgress(id, progress) < EXERCISES.length
   )
@@ -118,7 +130,7 @@ export const getProgress = async (profession: Discipline | null): Promise<number
   if (!profession.leafDisciplines) {
     return (await getDoneExercises(profession.id)) / EXERCISES.length
   }
-  const progress = await AsyncStorage.getExerciseProgress()
+  const progress = await getExerciseProgress()
   const doneExercises = profession.leafDisciplines.reduce(
     (acc, leaf) => acc + getDoneExercisesByProgress(leaf, progress),
     0
@@ -129,8 +141,7 @@ export const getProgress = async (profession: Discipline | null): Promise<number
 
 export const loadTrainingsSet = async (disciplineId: number): Promise<ServerResponseDiscipline> => {
   const trainingSetUrl = `${ENDPOINTS.trainingSets}/${disciplineId}`
-  const trainingSet = await getFromEndpoint<ServerResponseDiscipline>(trainingSetUrl)
-  return trainingSet
+  return getFromEndpoint<ServerResponseDiscipline>(trainingSetUrl)
 }
 
 export const getLabels = (): typeof labels => labels
@@ -142,16 +153,16 @@ export const sendFeedback = (comment: string, feedbackType: FeedbackType, id: nu
     object_id: id,
   })
 
-export const calculateScore = (documentsWithResults: DocumentResult[]): number => {
+export const calculateScore = (vocabularyItemsWithResults: VocabularyItemResult[]): number => {
   const SCORE_FIRST_TRY = 10
   const SCORE_SECOND_TRY = 4
   const SCORE_THIRD_TRY = 2
   return (
-    documentsWithResults
+    vocabularyItemsWithResults
       .filter(doc => doc.result === 'correct')
-      .reduce((acc, document) => {
+      .reduce((acc, vocabularyItemResult) => {
         let score = acc
-        switch (document.numberOfTries) {
+        switch (vocabularyItemResult.numberOfTries) {
           case 1:
             score += SCORE_FIRST_TRY
             break
@@ -163,6 +174,48 @@ export const calculateScore = (documentsWithResults: DocumentResult[]): number =
             break
         }
         return score
-      }, 0) / documentsWithResults.length
+      }, 0) / vocabularyItemsWithResults.length
   )
+}
+
+const normalizeSearchString = (searchString: string): string => {
+  const searchStringWithoutArticle = ARTICLES.map(article => article.value).includes(
+    searchString.split(' ')[0].toLowerCase()
+  )
+    ? searchString.substring(searchString.indexOf(' ') + 1)
+    : searchString
+  return normalizeStrings(searchStringWithoutArticle).toLowerCase().trim()
+}
+
+export const matchAlternative = (vocabularyItem: VocabularyItem, searchString: string): boolean =>
+  vocabularyItem.alternatives.filter(alternative =>
+    alternative.word.toLowerCase().includes(normalizeSearchString(searchString))
+  ).length > 0
+
+export const getSortedAndFilteredVocabularyItems = (
+  vocabularyItems: VocabularyItem[] | null,
+  searchString: string
+): VocabularyItem[] => {
+  const normalizedSearchString = normalizeSearchString(searchString)
+
+  const filteredVocabularyItems = vocabularyItems?.filter(
+    item => item.word.toLowerCase().includes(normalizedSearchString) || matchAlternative(item, normalizedSearchString)
+  )
+  return filteredVocabularyItems?.sort((a, b) => a.word.localeCompare(b.word)) ?? []
+}
+
+export const willNextExerciseUnlock = (previousScore: number | undefined, score: number): boolean =>
+  score > SCORE_THRESHOLD_UNLOCK && (previousScore ?? 0) <= SCORE_THRESHOLD_UNLOCK
+
+export const getImages = async (item: VocabularyItem): Promise<Images> => {
+  const images = await Promise.all(
+    item.images.map(async image => ({
+      id: image.id,
+      image: await readFile(image.image).catch(err => {
+        reportError(err)
+        return null
+      }),
+    }))
+  )
+  return images.filter((item): item is Image => item.image !== null)
 }

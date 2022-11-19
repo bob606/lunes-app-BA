@@ -7,7 +7,7 @@ import RouteWrapper from '../components/RouteWrapper'
 import VocabularyList from '../components/VocabularyList'
 import { ExerciseKeys, FeedbackType } from '../constants/data'
 import { RoutesParams } from '../navigation/NavigationTypes'
-import AsyncStorage from '../services/AsyncStorage'
+import { setExerciseProgress } from '../services/AsyncStorage'
 import { getLabels } from '../services/helpers'
 import { reportError } from '../services/sentry'
 
@@ -20,11 +20,11 @@ const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps):
   const { disciplineId, closeExerciseAction } = route.params
 
   useEffect(() => {
-    AsyncStorage.setExerciseProgress(disciplineId, ExerciseKeys.vocabularyList, 1).catch(reportError)
+    setExerciseProgress(disciplineId, ExerciseKeys.vocabularyList, 1).catch(reportError)
   }, [disciplineId])
 
   const onItemPress = (index: number) =>
-    navigation.navigate('VocabularyDetail', { ...route.params, documentIndex: index })
+    navigation.navigate('VocabularyDetailExercise', { ...route.params, vocabularyItemIndex: index })
 
   return (
     <RouteWrapper>
@@ -36,7 +36,7 @@ const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps):
         feedbackForId={disciplineId}
       />
       <VocabularyList
-        documents={route.params.documents}
+        vocabularyItems={route.params.vocabularyItems}
         onItemPress={onItemPress}
         title={getLabels().exercises.vocabularyList.title}
       />

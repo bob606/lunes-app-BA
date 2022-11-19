@@ -1,76 +1,53 @@
 import { StackNavigationProp } from '@react-navigation/stack'
-import normalizeStrings from 'normalize-strings'
 import React, { ReactElement, useState } from 'react'
 import { FlatList } from 'react-native'
-import { Subheading } from 'react-native-paper'
 import styled from 'styled-components/native'
 
-import { SadSmileyIcon } from '../../../assets/images'
+import ListEmpty from '../../components/ListEmpty'
 import RouteWrapper from '../../components/RouteWrapper'
 import SearchBar from '../../components/SearchBar'
 import ServerResponseHandler from '../../components/ServerResponseHandler'
 import Title from '../../components/Title'
-import { ARTICLES } from '../../constants/data'
-import { Document } from '../../constants/endpoints'
-import useLoadAllDocuments from '../../hooks/useLoadAllDocuments'
+import { VocabularyItem } from '../../constants/endpoints'
+import useLoadAllVocabularyItems from '../../hooks/useLoadAllVocabularyItems'
 import { RoutesParams } from '../../navigation/NavigationTypes'
-import { getLabels } from '../../services/helpers'
+import { getLabels, getSortedAndFilteredVocabularyItems, matchAlternative } from '../../services/helpers'
 import DictionaryItem from './components/DictionaryItem'
 
 const Root = styled.View`
   padding: 0 ${props => props.theme.spacings.sm};
 `
 
-const ListEmptyContainer = styled.View`
-  align-items: center;
-  padding: ${props => props.theme.spacings.sm} 0;
-`
-
-const StyledSadSmileyIcon = styled(SadSmileyIcon)`
-  padding: ${props => props.theme.spacings.md} 0;
-`
-
 const Header = styled.View`
   padding-bottom: ${props => props.theme.spacings.md};
 `
 
-interface Props {
+interface DictionaryScreenProps {
   navigation: StackNavigationProp<RoutesParams, 'Dictionary'>
 }
 
-const DictionaryScreen = ({ navigation }: Props): ReactElement => {
-  const documents = useLoadAllDocuments()
+const DictionaryScreen = ({ navigation }: DictionaryScreenProps): ReactElement => {
+  const vocabularyItems = useLoadAllVocabularyItems()
   const [searchString, setSearchString] = useState<string>('')
 
-  const searchStringWithoutArticle = ARTICLES.map(article => article.value).includes(
-    searchString.split(' ')[0].toLowerCase()
-  )
-    ? searchString.substring(searchString.indexOf(' ') + 1)
-    : searchString
-  const normalizedSearchString = normalizeStrings(searchStringWithoutArticle).toLowerCase().trim()
+  const sortedAndFilteredVocabularyItems = getSortedAndFilteredVocabularyItems(vocabularyItems.data, searchString)
 
-  const matchAlternative = (document: Document): boolean =>
-    document.alternatives.filter(alternative => alternative.word.toLowerCase().includes(normalizedSearchString))
-      .length > 0
-
-  const filteredDocuments = documents.data?.filter(
-    item => item.word.toLowerCase().includes(normalizedSearchString) || matchAlternative(item)
-  )
-  const sortedDocuments = filteredDocuments?.sort((a, b) => a.word.localeCompare(b.word))
-
-  const description = `${filteredDocuments?.length ?? 0} ${
-    (filteredDocuments?.length ?? 0) === 1 ? getLabels().general.word : getLabels().general.words
+  const description = `${sortedAndFilteredVocabularyItems.length} ${
+    sortedAndFilteredVocabularyItems.length === 1 ? getLabels().general.word : getLabels().general.words
   }`
 
-  const navigateToDetail = (document: Document): void => {
-    navigation.navigate('DictionaryDetail', { document })
+  const navigateToDetail = (vocabularyItem: VocabularyItem): void => {
+    navigation.navigate('VocabularyDetail', { vocabularyItem })
   }
 
   return (
     <RouteWrapper>
-      <ServerResponseHandler error={documents.error} loading={documents.loading} refresh={documents.refresh}>
+      <ServerResponseHandler
+        error={vocabularyItems.error}
+        loading={vocabularyItems.loading}
+        refresh={vocabularyItems.refresh}>
         <Root>
-          {documents.data && (
+          {vocabularyItems.data && (
             <FlatList
               keyboardShouldPersistTaps='handled'
               ListHeaderComponent={
@@ -79,21 +56,16 @@ const DictionaryScreen = ({ navigation }: Props): ReactElement => {
                   <SearchBar query={searchString} setQuery={setSearchString} />
                 </Header>
               }
-              data={sortedDocuments}
+              data={sortedAndFilteredVocabularyItems}
               renderItem={({ item }) => (
                 <DictionaryItem
-                  document={item}
-                  showAlternatives={matchAlternative(item) && searchString.length > 0}
+                  vocabularyItem={item}
+                  showAlternatives={matchAlternative(item, searchString) && searchString.length > 0}
                   navigateToDetail={navigateToDetail}
                 />
               )}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <ListEmptyContainer>
-                  <StyledSadSmileyIcon />
-                  <Subheading>{getLabels().dictionary.noResults}</Subheading>
-                </ListEmptyContainer>
-              }
+              ListEmptyComponent={<ListEmpty label={getLabels().general.noResults} />}
             />
           )}
         </Root>
