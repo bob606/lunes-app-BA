@@ -44,7 +44,7 @@ const AddElement = ({ onPress, label, explanation }: AddElementProps): ReactElem
           <AddCircleIcon width={theme.spacingsPlain.lg} height={theme.spacingsPlain.lg} />
         </FlexRow>
       </PressableContainer>
-      {explanation && <Explanation>{explanation}</Explanation>}
+      {!!explanation && <Explanation>{explanation}</Explanation>}
     </>
   )
 }
