@@ -16,6 +16,7 @@ import {
   numberOfMaxRetries,
   SIMPLE_RESULTS,
   SimpleResult,
+  ExerciseKeys,
 } from '../../../constants/data'
 import { AlternativeWord, VocabularyItem } from '../../../constants/endpoints'
 import { VocabularyItemResult, RoutesParams } from '../../../navigation/NavigationTypes'
@@ -154,6 +155,7 @@ const ChoiceExerciseScreen = ({
         numberOfWords={count}
         feedbackType={FeedbackType.vocabularyItem}
         feedbackForId={vocabularyItem.id}
+        exerciseKey={ExerciseKeys.wordChoiceExercise}
       />
 
       <>

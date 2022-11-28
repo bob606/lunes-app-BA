@@ -8,7 +8,7 @@ import { HiddenItem } from 'react-navigation-header-buttons'
 import styled, { useTheme } from 'styled-components/native'
 
 import { MenuIcon } from '../../assets/images'
-import { FeedbackType } from '../constants/data'
+import { FeedbackType, ExerciseKey } from '../constants/data'
 import { Route, RoutesParams } from '../navigation/NavigationTypes'
 import { getLabels } from '../services/helpers'
 import FeedbackModal from './FeedbackModal'
@@ -38,6 +38,7 @@ const StyledMenuIcon = styled(MenuIcon)`
 interface ExerciseHeaderProps {
   navigation: StackNavigationProp<RoutesParams, Route>
   closeExerciseAction: CommonNavigationAction
+  exerciseKey?: ExerciseKey
   feedbackType: FeedbackType
   feedbackForId: number
   currentWord?: number
@@ -57,21 +58,31 @@ const ExerciseHeader = ({
   confirmClose = true,
   labelOverride,
   isCloseButton = true,
+  exerciseKey,
 }: ExerciseHeaderProps): JSX.Element => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false)
   const theme = useTheme()
   const showProgress = numberOfWords !== undefined && numberOfWords > 0 && currentWord !== undefined
   const progressText = showProgress ? `${currentWord + 1} / ${numberOfWords}` : ''
+  const isWordList = exerciseKey === 0 || exerciseKey === undefined
+  const isLastWordInList = isWordList && numberOfWords === (currentWord ?? 0) + 1
 
   useEffect(() => {
-    const renderHeaderLeft = () => (
-      <NavigationHeaderLeft
-        title={labelOverride ?? getLabels().general.header.cancelExercise}
-        onPress={confirmClose ? () => setIsModalVisible(true) : () => navigation.dispatch(closeExerciseAction)}
-        isCloseButton={isCloseButton}
-      />
-    )
+    const renderHeaderLeft = () =>
+      isLastWordInList ? (
+        <NavigationHeaderLeft
+          title={labelOverride ?? getLabels().results.action.backToWordlist}
+          onPress={navigation.goBack}
+          isCloseButton={isCloseButton}
+        />
+      ) : (
+        <NavigationHeaderLeft
+          title={labelOverride ?? getLabels().general.header.cancelExercise}
+          onPress={confirmClose ? () => setIsModalVisible(true) : () => navigation.dispatch(closeExerciseAction)}
+          isCloseButton={isCloseButton}
+        />
+      )
 
     const renderHeaderRight = () => (
       <HeaderRightContainer>
@@ -101,6 +112,8 @@ const ExerciseHeader = ({
     setIsModalVisible,
     setIsFeedbackModalVisible,
     confirmClose,
+    currentWord,
+    numberOfWords,
     closeExerciseAction,
     labelOverride,
     isCloseButton,
