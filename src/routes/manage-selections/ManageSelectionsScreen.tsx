@@ -30,6 +30,9 @@ const SectionHeading = styled(Subheading)`
 const Padding = styled.View`
   padding-bottom: ${props => props.theme.spacings.xxl};
 `
+const StyledHeading = styled(Heading)`
+  text-align: center;
+`
 
 interface ManageSelectionScreenProps {
   navigation: StackNavigationProp<RoutesParams, 'ManageSelection'>
@@ -66,7 +69,7 @@ const ManageSelectionsScreen = ({ navigation }: ManageSelectionScreenProps): Rea
   return (
     <RouteWrapper>
       <Root contentContainerStyle={{ flexGrow: 1 }}>
-        <Heading style={{ textAlign: 'center' }}>{getLabels().manageSelection.heading}</Heading>
+        <StyledHeading>{getLabels().manageSelection.heading}</StyledHeading>
         <SectionHeading>{getLabels().manageSelection.yourProfessions}</SectionHeading>
         <HorizontalLine />
         {professionItems}
