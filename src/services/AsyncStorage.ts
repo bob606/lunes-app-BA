@@ -214,5 +214,6 @@ export const deleteUserVocabularyItem = async (userVocabularyItem: VocabularyIte
     vocab.filter(item => JSON.stringify(item) !== JSON.stringify(userVocabularyItem))
   )
   await removeFavorite({ id: userVocabularyItem.id, vocabularyItemType: VOCABULARY_ITEM_TYPES.userCreated })
+  // TODO: remove audio Funktion
   await setUserVocabularyItems(await userVocabulary)
 }

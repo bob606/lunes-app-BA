@@ -25,6 +25,7 @@ export interface Image {
 
 export type Images = Image[]
 
+// TODO: userAudioPath adden
 export interface VocabularyItem {
   id: number
   type: VocabularyItemType

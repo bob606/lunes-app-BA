@@ -6,7 +6,7 @@ import styled, { useTheme } from 'styled-components/native'
 import { VolumeUpCircleIcon } from '../../assets/images'
 import PressableOpacity from './PressableOpacity'
 
-const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean }>`
+const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean; isUserAudio?: boolean }>`
   width: ${props => props.theme.spacings.lg};
   height: ${props => props.theme.spacings.lg};
   border-radius: 50px;
@@ -15,9 +15,9 @@ const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boole
       return props.theme.colors.disabled
     }
     if (props.isActive) {
-      return props.theme.colors.audioIconSelected
+      return props.isUserAudio ? props.theme.colors.audioIconSelectedUser : props.theme.colors.audioIconSelected
     }
-    return props.theme.colors.audioIconHighlight
+    return props.isUserAudio ? props.theme.colors.audioIconHighlightUser : props.theme.colors.audioIconHighlight
   }};
   justify-content: center;
   align-items: center;
@@ -31,10 +31,11 @@ const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boole
 interface AudioPlayerProps {
   disabled: boolean
   audio: string
+  isUserAudio?: boolean
   isTtsText?: boolean
 }
 
-const AudioPlayer = ({ audio, disabled, isTtsText = false }: AudioPlayerProps): ReactElement => {
+const AudioPlayer = ({ audio, disabled, isTtsText = false, isUserAudio }: AudioPlayerProps): ReactElement => {
   const theme = useTheme()
   const [isInitialized, setIsInitialized] = useState<boolean>(false)
   const [isActive, setIsActive] = useState(false)
@@ -103,6 +104,7 @@ const AudioPlayer = ({ audio, disabled, isTtsText = false }: AudioPlayerProps): 
     <VolumeIcon
       disabled={disabled || !isInitialized}
       isActive={isActive}
+      isUserAudio={isUserAudio}
       onPress={handleSpeakerClick}
       testID='audio-player'>
       <VolumeUpCircleIcon width={theme.spacingsPlain.lg} height={theme.spacingsPlain.lg} />

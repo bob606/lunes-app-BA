@@ -12,6 +12,7 @@ const AudioContainer = styled.View`
   position: absolute;
   bottom: ${hp('-2.25%')}px;
   align-self: center;
+  display: flex;
 `
 const FavoriteContainer = styled.View`
   position: absolute;
@@ -28,6 +29,7 @@ interface VocabularyItemSectionProps {
   audioDisabled?: boolean
   minimized?: boolean
   submittedAlternative?: string | null
+  userAudioPath?: string
 }
 
 const VocabularyItemImageSection = ({
@@ -35,6 +37,7 @@ const VocabularyItemImageSection = ({
   audioDisabled = false,
   minimized = false,
   submittedAlternative,
+  userAudioPath,
 }: VocabularyItemSectionProps): ReactElement => (
   <Container>
     <ImageCarousel images={vocabularyItem.images} minimized={minimized} />
@@ -45,6 +48,7 @@ const VocabularyItemImageSection = ({
         isTtsText={!!submittedAlternative || !vocabularyItem.audio}
         disabled={audioDisabled}
       />
+      {!!userAudioPath && <AudioPlayer disabled={false} audio={userAudioPath} isUserAudio />}
     </AudioContainer>
     <FavoriteContainer>
       <FavoriteButton vocabularyItem={vocabularyItem} />
