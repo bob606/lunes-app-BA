@@ -55,6 +55,7 @@ import NoInternetConnectionIcon from './no-internet-connection.svg'
 import OpenLockIcon from './open-lock-icon.svg'
 import PartyHornIcon from './party-horn-circle-icon-white.svg'
 import PenIcon from './pen-icon.svg'
+import PlayArrowIcon from './play-arrow-icon.svg'
 import QRCodeIcon from './qr-code-icon.svg'
 import RepeatIcon from './repeat-icon.svg'
 import SadSmileyCircleIcon from './sad-smiley-circle-icon-white.svg'
@@ -129,6 +130,7 @@ export {
   OpenLockIcon,
   QRCodeIcon,
   PartyHornIcon,
+  PlayArrowIcon,
   PenIcon,
   RepeatIcon,
   SadSmileyIcon,

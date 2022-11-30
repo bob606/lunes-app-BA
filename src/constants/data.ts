@@ -11,6 +11,7 @@ export const ExerciseKeys = {
   wordChoiceExercise: 1,
   articleChoiceExercise: 2,
   writeExercise: 3,
+  speakExercise: 4,
 } as const
 export type ExerciseKey = typeof ExerciseKeys[keyof typeof ExerciseKeys]
 
@@ -50,6 +51,13 @@ export const EXERCISES: Readonly<Exercise[]> = [
     description: labels.exercises.write.description,
     level: 3,
     screen: 'WriteExercise',
+  },
+  {
+    key: ExerciseKeys.speakExercise,
+    title: labels.exercises.speak.title,
+    description: labels.exercises.speak.description,
+    level: 4,
+    screen: 'SpeakExercise',
   },
 ] as const
 

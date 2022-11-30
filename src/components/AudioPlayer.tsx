@@ -15,9 +15,9 @@ const VolumeIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boole
       return props.theme.colors.disabled
     }
     if (props.isActive) {
-      return props.isUserAudio ? props.theme.colors.audioIconSelectedUser : props.theme.colors.audioIconSelected
+      return props.isUserAudio ? props.theme.colors.userAudioIconSelected : props.theme.colors.audioIconSelected
     }
-    return props.isUserAudio ? props.theme.colors.audioIconHighlightUser : props.theme.colors.audioIconHighlight
+    return props.isUserAudio ? props.theme.colors.userAudioIconHighlight : props.theme.colors.audioIconHighlight
   }};
   justify-content: center;
   align-items: center;

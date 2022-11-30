@@ -40,7 +40,7 @@ audioRecorderPlayer.setSubscriptionDuration(accuracy).catch(reportError)
 const VocabularyDetail = ({ vocabularyItem }: VocabularyDetailProps): ReactElement => {
   const theme = useTheme()
   const [showAudioRecordOverlay, setShowAudioRecordOverlay] = useState<boolean>(false)
-  const [userAudioExists, setUserAudioExists] = useState<boolean | null>(null)
+  const [userAudioExists, setUserAudioExists] = useState(false)
   const { addAudio, retakeAudio } = getLabels().userAudio
 
   const audioPath = `file:///${DocumentDirectoryPath}/userAudio-${vocabularyItem.id}`
@@ -71,7 +71,6 @@ const VocabularyDetail = ({ vocabularyItem }: VocabularyDetailProps): ReactEleme
         <AudioRecordOverlay
           onClose={onCloseRecording}
           onAudioRecorded={onAudioRecorded}
-          recordingPath={null}
           setShowAudioRecordOverlay={setShowAudioRecordOverlay}
           audioRecorderPlayer={audioRecorderPlayer}
         />

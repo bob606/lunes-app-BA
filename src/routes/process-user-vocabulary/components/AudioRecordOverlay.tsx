@@ -79,7 +79,7 @@ interface AudioRecordOverlayProps {
   onAudioRecorded: (recordingPath: string) => void
   setShowAudioRecordOverlay: (showAudioRecordOverlay: boolean) => void
   audioRecorderPlayer: AudioRecorderPlayer
-  recordingPath: string | null
+  recordingPath?: string | null
 }
 
 const recordingTimeInit = '00:00'
@@ -123,9 +123,19 @@ const AudioRecordOverlay = ({
   const cleanedMetering = useMemo(() => cleanUpMeteringResults(meteringResults), [meteringResults])
 
   const onStopRecording = async (): Promise<void> => {
-    await audioRecorderPlayer.stopRecorder()
-    audioRecorderPlayer.removeRecordBackListener()
-    setShowAudioRecordOverlay(false)
+    try {
+      await audioRecorderPlayer.stopRecorder()
+      audioRecorderPlayer.removeRecordBackListener()
+      setShowAudioRecordOverlay(false)
+    } catch (e) {
+      // If the recording is stopped to fast, sometimes an error is thrown which can be ignored.
+      // https://github.com/hyochan/react-native-audio-recorder-player/issues/490
+      if (e instanceof Error && e.message !== 'stop failed.') {
+        reportError(e)
+      }
+    } finally {
+      setIsPressed(false)
+    }
   }
 
   const onStartRecording = async (): Promise<void> => {
@@ -171,11 +181,7 @@ const AudioRecordOverlay = ({
                     .catch(reportError)
                     .finally(() => setIsPressed(true))
                 }
-                onPressOut={() =>
-                  onStopRecording()
-                    .catch(reportError)
-                    .finally(() => setIsPressed(false))
-                }
+                onPressOut={onStopRecording}
                 isPressed={isPressed}
                 testID='record-audio-button'>
                 <MicrophoneIcon width={theme.spacingsPlain.xxl} height={theme.spacingsPlain.xxl} />
