@@ -107,6 +107,7 @@ const AudioRecordOverlay = ({
   const [meteringResults, setMeteringResults] = useState<number[]>([])
   const [recordingTime, setRecordingTime] = useState<string>(recordingTimeInit)
   const [isPressed, setIsPressed] = useState<boolean>(false)
+  const [recordingUri, setRecordingUri] = useState<string>()
   const { permissionGranted, permissionRequested } = useGrantPermissions(
     Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO
   )
@@ -127,6 +128,10 @@ const AudioRecordOverlay = ({
       await audioRecorderPlayer.stopRecorder()
       audioRecorderPlayer.removeRecordBackListener()
       setShowAudioRecordOverlay(false)
+      if(recordingUri){
+        onAudioRecorded(recordingUri)}else{
+        throw Error('recordingUri must be set before "onStopRecording" function is called')
+      }
     } catch (e) {
       // If the recording is stopped to fast, sometimes an error is thrown which can be ignored.
       // https://github.com/hyochan/react-native-audio-recorder-player/issues/490
@@ -140,7 +145,7 @@ const AudioRecordOverlay = ({
 
   const onStartRecording = async (): Promise<void> => {
     setMeteringResults([])
-    const uri = await audioRecorderPlayer.startRecorder(undefined, undefined, true)
+    setRecordingUri(await audioRecorderPlayer.startRecorder(undefined, undefined, true))
     audioRecorderPlayer.addRecordBackListener(async e => {
       setMeteringResults(oldMeteringResults => [
         ...oldMeteringResults,
@@ -151,7 +156,6 @@ const AudioRecordOverlay = ({
         await onStopRecording()
       }
     })
-    onAudioRecorded(uri)
   }
 
   return (
