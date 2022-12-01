@@ -2,8 +2,7 @@ import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { ReactElement, useEffect, useState } from 'react'
 import { Dimensions, Platform, TouchableOpacity } from 'react-native'
-import AudioRecorderPlayer from 'react-native-audio-recorder-player'
-import { PlayBackType } from 'react-native-audio-recorder-player/index'
+import AudioRecorderPlayer, { PlayBackType } from 'react-native-audio-recorder-player'
 import { DocumentDirectoryPath, moveFile } from 'react-native-fs'
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import styled, { useTheme } from 'styled-components/native'
@@ -15,7 +14,7 @@ import PressableOpacity from '../../components/PressableOpacity'
 import RouteWrapper from '../../components/RouteWrapper'
 import VocabularyItemImageSection from '../../components/VocabularyItemImageSection'
 import WordItem from '../../components/WordItem'
-import { BUTTONS_THEME, ExerciseKeys, FeedbackType, SIMPLE_RESULTS } from '../../constants/data'
+import { BUTTONS_THEME, ExerciseKeys, FeedbackType } from '../../constants/data'
 import { RoutesParams } from '../../navigation/NavigationTypes'
 import { saveExerciseProgress } from '../../services/AsyncStorage'
 import { getLabels, moveToEnd, shuffleArray } from '../../services/helpers'
@@ -52,7 +51,7 @@ const PlayIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean
   justify-content: center;
   align-items: center;
   shadow-color: ${props => props.theme.colors.shadow};
-  elevation: 8;
+  elevation: 8; //TODO: kein Plan ob die Änderung gut ist
   shadow-radius: 5px;
   shadow-offset: 1px 1px;
   shadow-opacity: 0.5;
@@ -89,8 +88,7 @@ export interface SpeakExerciseScreenProps {
 
 const audioPathWithFormatStr = (id: number): string => {
   const audioPath = `file:///${DocumentDirectoryPath}/userAudio-${id}`
-  const audioPathWithFormat = Platform.OS === 'ios' ? `${audioPath}.m4a` : `${audioPath}.mp4`
-  return audioPathWithFormat
+  return Platform.OS === 'ios' ? `${audioPath}.m4a` : `${audioPath}.mp4`
 }
 
 const accuracy = 0.1
@@ -103,6 +101,11 @@ const playerForPlayingUserAudio = new AudioRecorderPlayer()
 playerForPlayingUserAudio.setSubscriptionDuration(accuracy).catch(reportError)
 
 const screenWidth = Dimensions.get('screen').width
+
+const calculatePlayWidth = (position: number, duration: number): number => {
+  const indent = 56
+  return (position / duration) * (screenWidth - indent)
+}
 
 const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): ReactElement => {
   const theme = useTheme()
@@ -118,42 +121,58 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
     audioPathWithFormatStr(vocabularyItemsShuffled[currentIndex].id)
   )
 
-  const [currentPositionSecProfAudio, setCurrentPositionSecProfAudio] = useState(0)
-  const [currentDurationSecProfAudio, setCurrentDurationSecProfAudio] = useState(0)
   const [playWidthProfAudio, setPlayWidthProfAudio] = useState(0)
 
-  const [currentPositionSecUserAudio, setCurrentPositionSecUserAudio] = useState(0)
-  const [currentDurationSecUserAudio, setCurrentDurationSecUserAudio] = useState(0)
-  const [playWidthUserfAudio, setPlayWidthUserAudio] = useState(0)
+  const [playWidthUserAudio, setPlayWidthUserAudio] = useState(0)
 
-  // TODO: implement second audio bar
+  const startUserAudioPlayer = async (): Promise<void> => {
+    await playerForPlayingUserAudio.startPlayer(userAudioPathWithFormat)
+    playerForPlayingUserAudio.addPlayBackListener((e: PlayBackType) => {
+      if (e.duration === 0) {
+        setPlayWidthUserAudio(0)
+      } else if (e.currentPosition === e.duration) {
+        setPlayWidthUserAudio(0)
+        // eslint-disable-next-line no-void
+        void playerForPlayingUserAudio.stopPlayer()
+        playerForPlayingUserAudio.removePlayBackListener()
+      } else {
+        setPlayWidthUserAudio(calculatePlayWidth(e.currentPosition, e.duration))
+      }
+    })
+  }
+
+  const startProfAudioPlayer = async (playUserAudioAfter?: boolean): Promise<void> => {
+    const audio = vocabularyItemsShuffled[currentIndex].audio
+    if (!audio) {
+      return
+    }
+    await playerForPlayingProfAudio.startPlayer(audio)
+    playerForPlayingProfAudio.addPlayBackListener(async (e: PlayBackType) => {
+      if (e.duration === 0) {
+        setPlayWidthProfAudio(0)
+      } else if (e.currentPosition === e.duration) {
+        setPlayWidthProfAudio(0)
+        // eslint-disable-next-line no-void
+        await playerForPlayingProfAudio.stopPlayer()
+        playerForPlayingProfAudio.removePlayBackListener()
+        if (playUserAudioAfter) {
+          // eslint-disable-next-line no-void
+          await startUserAudioPlayer()
+        }
+      } else {
+        setPlayWidthProfAudio(calculatePlayWidth(e.currentPosition, e.duration))
+      }
+    })
+  }
 
   useEffect(() => {
     setUserAudioPathWithFormat(audioPathWithFormatStr(vocabularyItemsShuffled[currentIndex].id))
   }, [vocabularyItemsShuffled, currentIndex])
 
-  useEffect(() => {
-    if (currentDurationSecProfAudio === 0) {
-      setPlayWidthProfAudio(0)
-      return
-    }
-    if (currentPositionSecProfAudio === currentDurationSecProfAudio) {
-      setPlayWidthProfAudio(0)
-      // eslint-disable-next-line no-void
-      void playerForPlayingProfAudio.stopPlayer()
-      playerForPlayingProfAudio.removePlayBackListener() // TODO: in subfunktion auslagern
-      return
-    }
-    setPlayWidthProfAudio(
-      (currentPositionSecProfAudio / currentDurationSecProfAudio) *
-        // eslint-disable-next-line no-magic-numbers
-        (screenWidth - 56)
-    ) // TODO: in subfunktion auslagern
-  }, [currentPositionSecProfAudio, currentDurationSecProfAudio])
-
   const onAudioRecorded = async (recordingPath: string): Promise<void> => {
-    setUserAudioExists(true)
     await moveFile(recordingPath, userAudioPathWithFormat)
+    setUserAudioExists(true)
+    await startProfAudioPlayer(true)
   }
 
   const onCloseRecording = (): void => {
@@ -161,15 +180,11 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
   }
 
   const onProfAudioButtonPressed = async (): Promise<void> => {
-    const audio = vocabularyItemsShuffled[currentIndex].audio
-    if (!audio) {
-      return
-    }
-    await playerForPlayingProfAudio.startPlayer(audio)
-    playerForPlayingProfAudio.addPlayBackListener((e: PlayBackType) => {
-      setCurrentPositionSecProfAudio(e.currentPosition)
-      setCurrentDurationSecProfAudio(e.duration)
-    })
+    await startProfAudioPlayer()
+  }
+
+  const onUserAudioButtonPressed = async (): Promise<void> => {
+    await startUserAudioPlayer()
   }
 
   const tryLater = () => {
@@ -226,8 +241,8 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
           }}
         />
         <PlayIcon
-          disabled={currentPositionSecUserAudio > 0}
-          isActive={currentPositionSecProfAudio > 0}
+          disabled={playWidthUserAudio > 0}
+          isActive={playWidthProfAudio > 0}
           onPress={onProfAudioButtonPressed}>
           <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
         </PlayIcon>
@@ -236,6 +251,22 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
             <AudioBarPlay width={playWidthProfAudio} />
           </AudioBar>
         </AudioBarWrapper>
+        {userAudioExists && (
+          <>
+            <PlayIcon
+              disabled={playWidthProfAudio > 0}
+              isActive={playWidthUserAudio > 0}
+              isUserAudio
+              onPress={onUserAudioButtonPressed}>
+              <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
+            </PlayIcon>
+            <AudioBarWrapper>
+              <AudioBar>
+                <AudioBarPlay width={playWidthUserAudio} />
+              </AudioBar>
+            </AudioBarWrapper>
+          </>
+        )}
         <AddAudioButton
           onPress={() => setShowAudioRecordOverlay(true)}
           label={userAudioExists ? retakeAudio : addAudio}
