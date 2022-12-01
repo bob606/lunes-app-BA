@@ -1,7 +1,7 @@
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Dimensions, Platform, TouchableOpacity } from 'react-native'
+import { Dimensions, Platform } from 'react-native'
 import AudioRecorderPlayer, { PlayBackType } from 'react-native-audio-recorder-player'
 import { DocumentDirectoryPath, moveFile } from 'react-native-fs'
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
@@ -14,10 +14,10 @@ import PressableOpacity from '../../components/PressableOpacity'
 import RouteWrapper from '../../components/RouteWrapper'
 import VocabularyItemImageSection from '../../components/VocabularyItemImageSection'
 import WordItem from '../../components/WordItem'
-import { BUTTONS_THEME, ExerciseKeys, FeedbackType } from '../../constants/data'
+import { BUTTONS_THEME, ExerciseKeys, FeedbackType, SIMPLE_RESULTS } from '../../constants/data'
 import { RoutesParams } from '../../navigation/NavigationTypes'
-import { saveExerciseProgress } from '../../services/AsyncStorage'
-import { getLabels, moveToEnd, shuffleArray } from '../../services/helpers'
+import { getExerciseProgress, saveExerciseProgress } from '../../services/AsyncStorage'
+import { calculateScore, getLabels, moveToEnd, shuffleArray, willNextExerciseUnlock } from '../../services/helpers'
 import { reportError } from '../../services/sentry'
 import AudioRecordOverlay from '../process-user-vocabulary/components/AudioRecordOverlay'
 
@@ -51,15 +51,12 @@ const PlayIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean
   justify-content: center;
   align-items: center;
   shadow-color: ${props => props.theme.colors.shadow};
-  elevation: 8; //TODO: kein Plan ob die Änderung gut ist
+  elevation: 8;
   shadow-radius: 5px;
   shadow-offset: 1px 1px;
   shadow-opacity: 0.5;
 `
 
-const AudioBarWrapper = styled(TouchableOpacity)`
-  alignself: stretch;
-`
 const audioBarHeight = '40px'
 
 const AudioBar = styled.View`
@@ -113,6 +110,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
 
   const [showAudioRecordOverlay, setShowAudioRecordOverlay] = useState(false)
   const [userAudioExists, setUserAudioExists] = useState(false)
+  const [userAudioWasPlayed, setUserAudioWasPlayed] = useState(false)
   const { addAudio, retakeAudio } = getLabels().userAudio // TODO: change labels
 
   const [currentIndex, setCurrentIndex] = useState(0) // in production check for empty array
@@ -135,6 +133,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
         // eslint-disable-next-line no-void
         void playerForPlayingUserAudio.stopPlayer()
         playerForPlayingUserAudio.removePlayBackListener()
+        setUserAudioWasPlayed(true)
       } else {
         setPlayWidthUserAudio(calculatePlayWidth(e.currentPosition, e.duration))
       }
@@ -192,7 +191,12 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
   }
 
   const onExerciseFinished = async (): Promise<void> => {
-    const results = vocabularyItemsShuffled.map(vocabularyItem => ({ vocabularyItem, result: null, numberOfTries: 0 }))
+    const progress = await getExerciseProgress()
+    const results = vocabularyItemsShuffled.map(vocabularyItem => ({
+      vocabularyItem,
+      result: SIMPLE_RESULTS.correct,
+      numberOfTries: 1,
+    }))
     await saveExerciseProgress(disciplineId, ExerciseKeys.speakExercise, results)
     navigation.navigate('ExerciseFinished', {
       vocabularyItems,
@@ -201,7 +205,10 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
       exercise: ExerciseKeys.speakExercise,
       results,
       closeExerciseAction,
-      unlockedNextExercise: false,
+      unlockedNextExercise: willNextExerciseUnlock(
+        progress[disciplineId]?.[ExerciseKeys.speakExercise],
+        calculateScore(results)
+      ),
     })
   }
 
@@ -210,6 +217,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
       await onExerciseFinished()
     } else {
       setUserAudioExists(false)
+      setUserAudioWasPlayed(false)
       setCurrentIndex(currentIndex + 1)
     }
   }
@@ -246,11 +254,9 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
           onPress={onProfAudioButtonPressed}>
           <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
         </PlayIcon>
-        <AudioBarWrapper>
-          <AudioBar>
-            <AudioBarPlay width={playWidthProfAudio} />
-          </AudioBar>
-        </AudioBarWrapper>
+        <AudioBar>
+          <AudioBarPlay width={playWidthProfAudio} />
+        </AudioBar>
         {userAudioExists && (
           <>
             <PlayIcon
@@ -260,11 +266,9 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
               onPress={onUserAudioButtonPressed}>
               <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
             </PlayIcon>
-            <AudioBarWrapper>
-              <AudioBar>
-                <AudioBarPlay width={playWidthUserAudio} />
-              </AudioBar>
-            </AudioBarWrapper>
+            <AudioBar>
+              <AudioBarPlay width={playWidthUserAudio} />
+            </AudioBar>
           </>
         )}
         <AddAudioButton
@@ -276,7 +280,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
         />
       </InputContainer>
       <ButtonContainer>
-        {userAudioExists ? (
+        {userAudioExists && userAudioWasPlayed && (
           <Button
             label={
               currentIndex === vocabularyItemsShuffled.length - 1
@@ -287,15 +291,14 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
             onPress={onNextButtonPressed}
             buttonTheme={BUTTONS_THEME.contained}
           />
-        ) : (
-          currentIndex < vocabularyItemsShuffled.length - 1 && (
-            <Button
-              label={getLabels().exercises.tryLater}
-              iconRight={ArrowRightIcon}
-              onPress={tryLater}
-              buttonTheme={BUTTONS_THEME.text}
-            />
-          )
+        )}
+        {!userAudioExists && currentIndex < vocabularyItemsShuffled.length - 1 && (
+          <Button
+            label={getLabels().exercises.tryLater}
+            iconRight={ArrowRightIcon}
+            onPress={tryLater}
+            buttonTheme={BUTTONS_THEME.text}
+          />
         )}
       </ButtonContainer>
     </RouteWrapper>

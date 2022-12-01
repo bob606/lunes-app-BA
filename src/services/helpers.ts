@@ -77,11 +77,11 @@ export const shuffleArray = <T>(array: T[]): T[] => {
 const getDoneExercisesNumberInProgressByDiscipline = (disciplineId: number, progress: Progress): number => {
   const progressOfDiscipline = progress[disciplineId]
   return progressOfDiscipline
-      ? Object.keys(progressOfDiscipline).filter(item => {
+    ? Object.keys(progressOfDiscipline).filter(item => {
         const score = progressOfDiscipline[item]
         return score !== undefined && score > SCORE_THRESHOLD_UNLOCK
       }).length
-      : 0
+    : 0
 }
 
 export const getNumberOfUnlockedExercisesForDiscipline = async (disciplineId: number): Promise<number> => {
