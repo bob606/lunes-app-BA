@@ -41,7 +41,6 @@ const VocabularyDetailExerciseScreen = ({ route, navigation }: VocabularyDetailE
   const goToNextWord = () =>
     navigation.navigate('VocabularyDetailExercise', { ...route.params, vocabularyItemIndex: vocabularyItemIndex + 1 })
 
-  // TODO: UI Bug fixen
   return (
     <SafeAreaView>
       <ExerciseHeader

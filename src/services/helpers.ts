@@ -74,15 +74,20 @@ export const shuffleArray = <T>(array: T[]): T[] => {
   return shuffled
 }
 
-const getDoneExercisesByProgress = (disciplineId: number, progress: Progress): number => {
+const getDoneExercisesNumberInProgressByDiscipline = (disciplineId: number, progress: Progress): number => {
   const progressOfDiscipline = progress[disciplineId]
   return progressOfDiscipline
-    ? Object.keys(progressOfDiscipline).filter(item => progressOfDiscipline[item] !== undefined).length
-    : 0
+      ? Object.keys(progressOfDiscipline).filter(item => {
+        const score = progressOfDiscipline[item]
+        return score !== undefined && score > SCORE_THRESHOLD_UNLOCK
+      }).length
+      : 0
 }
 
-export const getDoneExercises = (disciplineId: number): Promise<number> =>
-  getExerciseProgress().then(progress => getDoneExercisesByProgress(disciplineId, progress))
+export const getNumberOfUnlockedExercisesForDiscipline = async (disciplineId: number): Promise<number> => {
+  const progress = await getExerciseProgress()
+  return getDoneExercisesNumberInProgressByDiscipline(disciplineId, progress)
+}
 
 /*
   Calculates the next exercise that needs to be done for a profession (= second level discipline of lunes standard vocabulary)
@@ -98,7 +103,7 @@ export const getNextExercise = async (profession: Discipline): Promise<NextExerc
   }
   const progress = await getExerciseProgress()
   const firstUnfinishedDisciplineId = leafDisciplineIds.find(
-    id => getDoneExercisesByProgress(id, progress) < EXERCISES.length
+    id => getDoneExercisesNumberInProgressByDiscipline(id, progress) < EXERCISES.length
   )
 
   if (!firstUnfinishedDisciplineId) {
@@ -126,11 +131,11 @@ export const getProgress = async (profession: Discipline | null): Promise<number
     return 0
   }
   if (!profession.leafDisciplines) {
-    return (await getDoneExercises(profession.id)) / EXERCISES.length
+    return (await getNumberOfUnlockedExercisesForDiscipline(profession.id)) / EXERCISES.length
   }
   const progress = await getExerciseProgress()
   const doneExercises = profession.leafDisciplines.reduce(
-    (acc, leaf) => acc + getDoneExercisesByProgress(leaf, progress),
+    (acc, leaf) => acc + getDoneExercisesNumberInProgressByDiscipline(leaf, progress),
     0
   )
   const totalExercises = profession.leafDisciplines.length * EXERCISES.length

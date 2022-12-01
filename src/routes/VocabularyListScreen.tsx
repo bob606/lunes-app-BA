@@ -5,10 +5,10 @@ import React, { useEffect } from 'react'
 import ExerciseHeader from '../components/ExerciseHeader'
 import RouteWrapper from '../components/RouteWrapper'
 import VocabularyList from '../components/VocabularyList'
-import { ExerciseKeys, FeedbackType } from '../constants/data'
+import {ExerciseKeys, FeedbackType, SIMPLE_RESULTS} from '../constants/data'
 import { RoutesParams } from '../navigation/NavigationTypes'
 import { setExerciseProgress } from '../services/AsyncStorage'
-import { getLabels } from '../services/helpers'
+import {calculateScore, getLabels} from '../services/helpers'
 import { reportError } from '../services/sentry'
 
 interface VocabularyListScreenProps {
@@ -17,11 +17,16 @@ interface VocabularyListScreenProps {
 }
 
 const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps): JSX.Element => {
-  const { disciplineId, closeExerciseAction } = route.params
+  const { disciplineId, closeExerciseAction, vocabularyItems} = route.params
 
   useEffect(() => {
-    setExerciseProgress(disciplineId, ExerciseKeys.vocabularyList, 1).catch(reportError)
-  }, [disciplineId])
+      const fakePassingResults = vocabularyItems.map(vocabularyItem => ({
+          vocabularyItem, result: SIMPLE_RESULTS.correct, numberOfTries: 1
+      }))
+      setExerciseProgress(
+          disciplineId, ExerciseKeys.vocabularyList, calculateScore(fakePassingResults)
+      ).catch(reportError)
+  }, [disciplineId, vocabularyItems])
 
   const onItemPress = (index: number) =>
     navigation.navigate('VocabularyDetailExercise', { ...route.params, vocabularyItemIndex: index })
@@ -36,7 +41,7 @@ const VocabularyListScreen = ({ route, navigation }: VocabularyListScreenProps):
         feedbackForId={disciplineId}
       />
       <VocabularyList
-        vocabularyItems={route.params.vocabularyItems}
+        vocabularyItems={vocabularyItems}
         onItemPress={onItemPress}
         title={getLabels().exercises.vocabularyList.title}
       />
