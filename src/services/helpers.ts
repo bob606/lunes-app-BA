@@ -1,5 +1,7 @@
 import { AxiosResponse } from 'axios'
 import normalizeStrings from 'normalize-strings'
+import { Platform } from 'react-native'
+import { DocumentDirectoryPath } from 'react-native-fs'
 
 import {
   Article,
@@ -22,6 +24,10 @@ import { getFromEndpoint, postToEndpoint } from './axios'
 export const stringifyVocabularyItem = ({ article, word }: VocabularyItem | AlternativeWord): string =>
   `${article.value} ${word}`
 
+export const getUserAudioPathWithFormat = (id: number): string => {
+  const audioPath = `file:///${DocumentDirectoryPath}/userAudio-${id}`
+  return Platform.OS === 'ios' ? `${audioPath}.m4a` : `${audioPath}.mp4`
+}
 export const getArticleColor = (article: Article): string => {
   switch (article.id) {
     case 1:
@@ -110,7 +116,7 @@ export const getNextExercise = async (profession: Discipline): Promise<NextExerc
     return {
       disciplineId: leafDisciplineIds[0],
       exerciseKey: 0,
-    } // TODO LUN-319 show success that every exercise is done
+    }
   }
   const disciplineProgress = progress[firstUnfinishedDisciplineId]
   if (!disciplineProgress) {

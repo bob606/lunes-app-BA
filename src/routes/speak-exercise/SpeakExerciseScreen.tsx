@@ -1,13 +1,14 @@
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Dimensions, Platform } from 'react-native'
+import { Dimensions } from 'react-native'
 import AudioRecorderPlayer, { PlayBackType } from 'react-native-audio-recorder-player'
-import { DocumentDirectoryPath, moveFile } from 'react-native-fs'
+import { moveFile } from 'react-native-fs'
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import styled, { useTheme } from 'styled-components/native'
 
-import { ArrowRightIcon, MicrophoneCircleIcon, PlayArrowIcon } from '../../../assets/images'
+import { ArrowRightIcon, VolumeUpCircleIcon } from '../../../assets/images'
+import AddAudioButton from '../../components/AddAudioButton'
 import Button from '../../components/Button'
 import ExerciseHeader from '../../components/ExerciseHeader'
 import PressableOpacity from '../../components/PressableOpacity'
@@ -17,7 +18,14 @@ import WordItem from '../../components/WordItem'
 import { BUTTONS_THEME, ExerciseKeys, FeedbackType, SIMPLE_RESULTS } from '../../constants/data'
 import { RoutesParams } from '../../navigation/NavigationTypes'
 import { getExerciseProgress, saveExerciseProgress } from '../../services/AsyncStorage'
-import { calculateScore, getLabels, moveToEnd, shuffleArray, willNextExerciseUnlock } from '../../services/helpers'
+import {
+  calculateScore,
+  getLabels,
+  getUserAudioPathWithFormat,
+  moveToEnd,
+  shuffleArray,
+  willNextExerciseUnlock,
+} from '../../services/helpers'
 import { reportError } from '../../services/sentry'
 import AudioRecordOverlay from '../process-user-vocabulary/components/AudioRecordOverlay'
 
@@ -26,13 +34,6 @@ const InputContainer = styled.View`
   height: ${hp('33%')}px;
   width: 85%;
   align-self: center;
-`
-
-// TODO: for clean code export, double of AudioRecorder.tsx line 35
-const AddAudioButton = styled(Button)`
-  margin-top: ${props => props.theme.spacings.md};
-  justify-content: flex-start;
-  padding: 0;
 `
 
 const PlayIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean; isUserAudio?: boolean }>`
@@ -57,12 +58,20 @@ const PlayIcon = styled(PressableOpacity)<{ disabled: boolean; isActive: boolean
   shadow-opacity: 0.5;
 `
 
-const audioBarHeight = '40px'
+const audioBarHeight = '25px'
+
+const AudioBarContainer = styled.View`
+  margin-top: 15px;
+  align-self: stretch;
+  flex-direction: row;
+`
 
 const AudioBar = styled.View`
+  margin-left: 5px;
   background-color: #ccc;
   height: ${audioBarHeight};
-  align-self: stretch;
+  align-self: center;
+  flex: 1;
 `
 
 const AudioBarPlay = styled.View<{ width: number }>`
@@ -83,11 +92,6 @@ export interface SpeakExerciseScreenProps {
   navigation: StackNavigationProp<RoutesParams, 'WriteExercise'>
 }
 
-const audioPathWithFormatStr = (id: number): string => {
-  const audioPath = `file:///${DocumentDirectoryPath}/userAudio-${id}`
-  return Platform.OS === 'ios' ? `${audioPath}.m4a` : `${audioPath}.mp4`
-}
-
 const accuracy = 0.1
 
 const playerForRecording = new AudioRecorderPlayer()
@@ -100,7 +104,7 @@ playerForPlayingUserAudio.setSubscriptionDuration(accuracy).catch(reportError)
 const screenWidth = Dimensions.get('screen').width
 
 const calculatePlayWidth = (position: number, duration: number): number => {
-  const indent = 56
+  const indent = 90
   return (position / duration) * (screenWidth - indent)
 }
 
@@ -111,12 +115,12 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
   const [showAudioRecordOverlay, setShowAudioRecordOverlay] = useState(false)
   const [userAudioExists, setUserAudioExists] = useState(false)
   const [userAudioWasPlayed, setUserAudioWasPlayed] = useState(false)
-  const { addAudio, retakeAudio } = getLabels().userAudio // TODO: change labels
+  const { addAudio, retakeAudio } = getLabels().userAudio
 
   const [currentIndex, setCurrentIndex] = useState(0) // in production check for empty array
-  const [vocabularyItemsShuffled, setVocabularyItemsShuffled] = useState(shuffleArray(vocabularyItems)) // TODO: hier gucken, dass wenn ich die Übung direkt nochmal mache, die Wörter nicht die gleiche Reihenfolge haben
+  const [vocabularyItemsShuffled, setVocabularyItemsShuffled] = useState(shuffleArray(vocabularyItems))
   const [userAudioPathWithFormat, setUserAudioPathWithFormat] = useState(
-    audioPathWithFormatStr(vocabularyItemsShuffled[currentIndex].id)
+    getUserAudioPathWithFormat(vocabularyItemsShuffled[currentIndex].id)
   )
 
   const [playWidthProfAudio, setPlayWidthProfAudio] = useState(0)
@@ -165,7 +169,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
   }
 
   useEffect(() => {
-    setUserAudioPathWithFormat(audioPathWithFormatStr(vocabularyItemsShuffled[currentIndex].id))
+    setUserAudioPathWithFormat(getUserAudioPathWithFormat(vocabularyItemsShuffled[currentIndex].id))
   }, [vocabularyItemsShuffled, currentIndex])
 
   const onAudioRecorded = async (recordingPath: string): Promise<void> => {
@@ -240,7 +244,7 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
         feedbackType={FeedbackType.vocabularyItem}
         feedbackForId={vocabularyItemsShuffled[currentIndex].id}
       />
-      <VocabularyItemImageSection vocabularyItem={vocabularyItemsShuffled[currentIndex]} />
+      <VocabularyItemImageSection vocabularyItem={vocabularyItemsShuffled[currentIndex]} dontShowAudioIcon />
       <InputContainer>
         <WordItem
           answer={{
@@ -248,35 +252,34 @@ const SpeakExerciseScreen = ({ route, navigation }: SpeakExerciseScreenProps): R
             article: vocabularyItemsShuffled[currentIndex].article,
           }}
         />
-        <PlayIcon
-          disabled={playWidthUserAudio > 0}
-          isActive={playWidthProfAudio > 0}
-          onPress={onProfAudioButtonPressed}>
-          <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
-        </PlayIcon>
-        <AudioBar>
-          <AudioBarPlay width={playWidthProfAudio} />
-        </AudioBar>
+        <AudioBarContainer>
+          <PlayIcon
+            disabled={playWidthUserAudio > 0}
+            isActive={playWidthProfAudio > 0}
+            onPress={onProfAudioButtonPressed}>
+            <VolumeUpCircleIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl} />
+          </PlayIcon>
+          <AudioBar>
+            <AudioBarPlay width={playWidthProfAudio} />
+          </AudioBar>
+        </AudioBarContainer>
         {userAudioExists && (
-          <>
+          <AudioBarContainer>
             <PlayIcon
               disabled={playWidthProfAudio > 0}
               isActive={playWidthUserAudio > 0}
               isUserAudio
               onPress={onUserAudioButtonPressed}>
-              <PlayArrowIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl /* TODO: is not shown */} />
+              <VolumeUpCircleIcon width={theme.spacingsPlain.xl} height={theme.spacingsPlain.xl} />
             </PlayIcon>
             <AudioBar>
               <AudioBarPlay width={playWidthUserAudio} />
             </AudioBar>
-          </>
+          </AudioBarContainer>
         )}
         <AddAudioButton
           onPress={() => setShowAudioRecordOverlay(true)}
           label={userAudioExists ? retakeAudio : addAudio}
-          buttonTheme={BUTTONS_THEME.text}
-          iconLeft={MicrophoneCircleIcon}
-          iconSize={theme.spacingsPlain.xl}
         />
       </InputContainer>
       <ButtonContainer>

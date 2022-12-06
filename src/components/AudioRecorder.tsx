@@ -2,13 +2,12 @@ import React, { ReactElement, useState } from 'react'
 import AudioRecorderPlayer from 'react-native-audio-recorder-player'
 import styled, { useTheme } from 'styled-components/native'
 
-import { CloseCircleIconBlue, MicrophoneCircleIcon } from '../../assets/images'
-import { BUTTONS_THEME } from '../constants/data'
+import { CloseCircleIconBlue } from '../../assets/images'
 import AudioRecordOverlay from '../routes/process-user-vocabulary/components/AudioRecordOverlay'
 import { getLabels } from '../services/helpers'
 import { reportError } from '../services/sentry'
+import AddAudioButton from './AddAudioButton'
 import AudioPlayer from './AudioPlayer'
-import Button from './Button'
 import { Subheading } from './text/Subheading'
 
 const AudioContainer = styled.View`
@@ -30,12 +29,6 @@ const DeleteContainer = styled.Pressable`
 
 const AudioText = styled(Subheading)`
   align-self: center;
-`
-
-const AddAudioButton = styled(Button)`
-  margin-top: ${props => props.theme.spacings.md};
-  justify-content: flex-start;
-  padding: 0;
 `
 
 interface AudioRecorderProps {
@@ -84,13 +77,7 @@ const AudioRecorder = ({ recordingPath, setRecordingPath }: AudioRecorderProps):
           </>
         </AudioContainer>
       ) : (
-        <AddAudioButton
-          onPress={() => setShowAudioRecordOverlay(true)}
-          label={addAudio}
-          buttonTheme={BUTTONS_THEME.text}
-          iconLeft={MicrophoneCircleIcon}
-          iconSize={theme.spacingsPlain.xl}
-        />
+        <AddAudioButton onPress={() => setShowAudioRecordOverlay(true)} label={addAudio} />
       )}
     </>
   )

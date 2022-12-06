@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react'
+import { View } from 'react-native'
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import styled from 'styled-components/native'
 
@@ -13,6 +14,7 @@ const AudioContainer = styled.View`
   bottom: ${hp('-2.25%')}px;
   align-self: center;
   display: flex;
+  flex-direction: row;
 `
 const FavoriteContainer = styled.View`
   position: absolute;
@@ -26,6 +28,7 @@ const Container = styled.View`
 
 interface VocabularyItemSectionProps {
   vocabularyItem: VocabularyItem
+  dontShowAudioIcon?: boolean
   audioDisabled?: boolean
   minimized?: boolean
   submittedAlternative?: string | null
@@ -38,18 +41,22 @@ const VocabularyItemImageSection = ({
   minimized = false,
   submittedAlternative,
   userAudioPath,
+  dontShowAudioIcon,
 }: VocabularyItemSectionProps): ReactElement => (
   <Container>
     <ImageCarousel images={vocabularyItem.images} minimized={minimized} />
-    <AudioContainer>
-      <AudioPlayer
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- False positive, left hand side is possible null or undefined
-        audio={submittedAlternative ?? vocabularyItem.audio ?? stringifyVocabularyItem(vocabularyItem)}
-        isTtsText={!!submittedAlternative || !vocabularyItem.audio}
-        disabled={audioDisabled}
-      />
-      {!!userAudioPath && <AudioPlayer disabled={false} audio={userAudioPath} isUserAudio />}
-    </AudioContainer>
+    {!dontShowAudioIcon && (
+      <AudioContainer>
+        <AudioPlayer
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- False positive, left hand side is possible null or undefined
+          audio={submittedAlternative ?? vocabularyItem.audio ?? stringifyVocabularyItem(vocabularyItem)}
+          isTtsText={!!submittedAlternative || !vocabularyItem.audio}
+          disabled={audioDisabled}
+        />
+        <View style={{ width: 15 }} />
+        {!!userAudioPath && <AudioPlayer disabled={false} audio={userAudioPath} isUserAudio />}
+      </AudioContainer>
+    )}
     <FavoriteContainer>
       <FavoriteButton vocabularyItem={vocabularyItem} />
     </FavoriteContainer>

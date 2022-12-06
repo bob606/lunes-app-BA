@@ -1,16 +1,16 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import AudioRecorderPlayer from 'react-native-audio-recorder-player'
 import { DocumentDirectoryPath, exists, moveFile } from 'react-native-fs'
-import styled, { useTheme } from 'styled-components/native'
+import styled from 'styled-components/native'
 
-import { MicrophoneCircleIcon } from '../../assets/images'
-import { BUTTONS_THEME } from '../constants/data'
 import { VocabularyItem } from '../constants/endpoints'
 import AudioRecordOverlay from '../routes/process-user-vocabulary/components/AudioRecordOverlay'
-import { getLabels } from '../services/helpers'
+import AlternativeWordsSection from '../routes/vocabulary-detail-exercise/components/AlternativeWordsSection'
+import { getLabels, getUserAudioPathWithFormat } from '../services/helpers'
 import { reportError } from '../services/sentry'
-import Button from './Button'
+import AddAudioButton from './AddAudioButton'
+import HorizontalLine from './HorizontalLine'
 import VocabularyItemImageSection from './VocabularyItemImageSection'
 import WordItem from './WordItem'
 
@@ -19,13 +19,6 @@ const ItemContainer = styled.View`
   height: 10%;
   width: 85%;
   align-self: center;
-`
-
-// TODO: for clean code export, double of AudioRecorder.tsx line 35
-const AddAudioButton = styled(Button)`
-  margin-top: ${props => props.theme.spacings.md};
-  justify-content: flex-start;
-  padding: 0;
 `
 
 interface VocabularyDetailProps {
@@ -38,23 +31,26 @@ const audioRecorderPlayer = new AudioRecorderPlayer()
 audioRecorderPlayer.setSubscriptionDuration(accuracy).catch(reportError)
 
 const VocabularyDetail = ({ vocabularyItem }: VocabularyDetailProps): ReactElement => {
-  const theme = useTheme()
   const [showAudioRecordOverlay, setShowAudioRecordOverlay] = useState<boolean>(false)
   const [userAudioExists, setUserAudioExists] = useState(false)
   const { addAudio, retakeAudio } = getLabels().userAudio
-
+  const [userAudioPathWithFormat, setUserAudioPathWithFormat] = useState(getUserAudioPathWithFormat(vocabularyItem.id))
   const audioPath = `file:///${DocumentDirectoryPath}/userAudio-${vocabularyItem.id}`
   const audioPathWithFormat = Platform.OS === 'ios' ? `${audioPath}.m4a` : `${audioPath}.mp4`
 
   useEffect(() => {
-    exists(audioPathWithFormat)
+    exists(userAudioPathWithFormat)
       .then(result => {
         setUserAudioExists(result)
       })
       .catch(() => {
-        // insert error catching here
+        // insert error catching here for production
       })
-  }, [audioPathWithFormat])
+  }, [userAudioPathWithFormat])
+
+  useEffect(() => {
+    setUserAudioPathWithFormat(getUserAudioPathWithFormat(vocabularyItem.id))
+  }, [vocabularyItem])
 
   const onAudioRecorded = async (recordingPath: string): Promise<void> => {
     setUserAudioExists(true)
@@ -66,7 +62,7 @@ const VocabularyDetail = ({ vocabularyItem }: VocabularyDetailProps): ReactEleme
   }
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {showAudioRecordOverlay && (
         <AudioRecordOverlay
           onClose={onCloseRecording}
@@ -84,12 +80,11 @@ const VocabularyDetail = ({ vocabularyItem }: VocabularyDetailProps): ReactEleme
         <AddAudioButton
           onPress={() => setShowAudioRecordOverlay(true)}
           label={userAudioExists ? retakeAudio : addAudio}
-          buttonTheme={BUTTONS_THEME.text}
-          iconLeft={MicrophoneCircleIcon}
-          iconSize={theme.spacingsPlain.xl}
         />
+        <HorizontalLine />
+        <AlternativeWordsSection vocabularyItem={vocabularyItem} />
       </ItemContainer>
-    </>
+    </View>
   )
 }
 
