@@ -188,8 +188,8 @@ export const FeedbackType = {
 export type FeedbackType = typeof FeedbackType[keyof typeof FeedbackType]
 
 export const numberOfMaxRetries = 2
-export const SCORE_THRESHOLD_POSITIVE_FEEDBACK = 6
-export const SCORE_THRESHOLD_UNLOCK = 6
+export const SCORE_THRESHOLD_POSITIVE_FEEDBACK = 4
+export const SCORE_THRESHOLD_UNLOCK = 2
 
 export const enum EXERCISE_FEEDBACK {
   POSITIVE,
