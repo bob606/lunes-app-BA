@@ -1,5 +1,5 @@
 # Forking Reason
-This fork contains additional code written for the BA of bob606. Please see branch for `SALIU-BA-EXT` that said code. A complete overview of all implemented changes for the BA can be seen in the created (PR)[https://github.com/bob606/lunes-app-BA/pull/2].
+This fork contains additional code written for the BA of bob606. Please see branch for `SALIU-BA-EXT` that said code. A complete overview of all implemented changes for the BA can be seen in the created [PR](https://github.com/bob606/lunes-app-BA/pull/2).
 
 # Lunes App
 
