@@ -19,7 +19,7 @@ describe('UserVocabularyProcessScreen', () => {
     const deleteThumbnail = getByTestId('delete-on-thumbnail')
     expect(getByText(getLabels().userVocabulary.creation.addImage)).not.toBeDisabled()
     fireEvent.press(deleteThumbnail)
-    expect(setState).toHaveBeenCalled() // TODO vielleicht noch verbessern
+    expect(setState).toHaveBeenCalled()
   })
 
   it('should disable image button, if already three images selected', () => {

@@ -20,8 +20,8 @@ import {
 } from '../../constants/data'
 import useKeyboard from '../../hooks/useKeyboard'
 import { VocabularyItemResult, RoutesParams } from '../../navigation/NavigationTypes'
-import { saveExerciseProgress } from '../../services/AsyncStorage'
-import { getLabels, moveToEnd, shuffleArray } from '../../services/helpers'
+import { getExerciseProgress, saveExerciseProgress } from '../../services/AsyncStorage'
+import { calculateScore, getLabels, moveToEnd, shuffleArray, willNextExerciseUnlock } from '../../services/helpers'
 import InteractionSection from './components/InteractionSection'
 
 const ButtonContainer = styled.View`
@@ -74,9 +74,10 @@ const WriteExerciseScreen = ({ route, navigation }: WriteExerciseScreenProps): R
   }, [isKeyboardVisible, vocabularyItemWithResults, currentIndex])
 
   const finishExercise = async (results: VocabularyItemResult[]): Promise<void> => {
-    if (disciplineId) {
-      await saveExerciseProgress(disciplineId, ExerciseKeys.writeExercise, results)
-    }
+    const progress = await getExerciseProgress()
+
+    await saveExerciseProgress(disciplineId, ExerciseKeys.writeExercise, results)
+
     navigation.navigate('ExerciseFinished', {
       vocabularyItems,
       disciplineTitle,
@@ -84,7 +85,10 @@ const WriteExerciseScreen = ({ route, navigation }: WriteExerciseScreenProps): R
       results,
       exercise: ExerciseKeys.writeExercise,
       closeExerciseAction,
-      unlockedNextExercise: false,
+      unlockedNextExercise: willNextExerciseUnlock(
+        progress[disciplineId]?.[ExerciseKeys.writeExercise],
+        calculateScore(results)
+      ),
     })
     initializeExercise(true)
   }
@@ -137,7 +141,6 @@ const WriteExerciseScreen = ({ route, navigation }: WriteExerciseScreenProps): R
           feedbackType={FeedbackType.vocabularyItem}
           feedbackForId={vocabularyItems[currentIndex].id}
         />
-
         <InteractionSection
           vocabularyItemWithResult={current}
           storeResult={storeResult}

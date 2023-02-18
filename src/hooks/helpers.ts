@@ -30,7 +30,7 @@ export const formatDiscipline = (
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   isLeaf: item.total_documents !== undefined,
   parentTitle: !isTypeLoadProtected(loadingInfo) && loadingInfo.parent ? loadingInfo.parent.title : null,
-  apiKey: isTypeLoadProtected(loadingInfo) ? loadingInfo.apiKey : loadingInfo.parent?.apiKey, // TODO make function for getting api key and reuse
+  apiKey: isTypeLoadProtected(loadingInfo) ? loadingInfo.apiKey : loadingInfo.parent?.apiKey,
   needsTrainingSetEndpoint: !!item.total_training_sets && item.total_training_sets > 0,
   leafDisciplines: item.nested_training_sets,
 })

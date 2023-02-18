@@ -67,6 +67,7 @@ export type RoutesParams = {
   WordChoiceExercise: ExerciseParams
   ArticleChoiceExercise: ExerciseParams
   WriteExercise: ExerciseParams
+  SpeakExercise: ExerciseParams
   ExerciseFinished: ResultParams & {
     unlockedNextExercise: boolean
   }

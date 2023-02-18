@@ -1,5 +1,6 @@
 import { RouteProp } from '@react-navigation/native'
 import React, { ReactElement } from 'react'
+import { ScrollView } from 'react-native'
 
 import RouteWrapper from '../components/RouteWrapper'
 import VocabularyDetail from '../components/VocabularyDetail'
@@ -13,7 +14,9 @@ const VocabularyDetailScreen = ({ route }: VocabularyDetailScreenProps): ReactEl
   const { vocabularyItem } = route.params
   return (
     <RouteWrapper>
-      <VocabularyDetail vocabularyItem={vocabularyItem} />
+      <ScrollView>
+        <VocabularyDetail vocabularyItem={vocabularyItem} />
+      </ScrollView>
     </RouteWrapper>
   )
 }

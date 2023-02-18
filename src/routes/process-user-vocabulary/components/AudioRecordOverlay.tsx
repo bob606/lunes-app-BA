@@ -79,7 +79,7 @@ interface AudioRecordOverlayProps {
   onAudioRecorded: (recordingPath: string) => void
   setShowAudioRecordOverlay: (showAudioRecordOverlay: boolean) => void
   audioRecorderPlayer: AudioRecorderPlayer
-  recordingPath: string | null
+  recordingPath?: string | null
 }
 
 const recordingTimeInit = '00:00'
@@ -107,6 +107,7 @@ const AudioRecordOverlay = ({
   const [meteringResults, setMeteringResults] = useState<number[]>([])
   const [recordingTime, setRecordingTime] = useState<string>(recordingTimeInit)
   const [isPressed, setIsPressed] = useState<boolean>(false)
+  const [recordingUri, setRecordingUri] = useState<string>()
   const { permissionGranted, permissionRequested } = useGrantPermissions(
     Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO
   )
@@ -123,14 +124,29 @@ const AudioRecordOverlay = ({
   const cleanedMetering = useMemo(() => cleanUpMeteringResults(meteringResults), [meteringResults])
 
   const onStopRecording = async (): Promise<void> => {
-    await audioRecorderPlayer.stopRecorder()
-    audioRecorderPlayer.removeRecordBackListener()
-    setShowAudioRecordOverlay(false)
+    try {
+      await audioRecorderPlayer.stopRecorder()
+      audioRecorderPlayer.removeRecordBackListener()
+      setShowAudioRecordOverlay(false)
+      if (recordingUri) {
+        onAudioRecorded(recordingUri)
+      } else {
+        throw Error('recordingUri must be set before "onStopRecording" function is called')
+      }
+    } catch (e) {
+      // If the recording is stopped to fast, sometimes an error is thrown which can be ignored.
+      // https://github.com/hyochan/react-native-audio-recorder-player/issues/490
+      if (e instanceof Error && e.message !== 'stop failed.') {
+        reportError(e)
+      }
+    } finally {
+      setIsPressed(false)
+    }
   }
 
   const onStartRecording = async (): Promise<void> => {
     setMeteringResults([])
-    const uri = await audioRecorderPlayer.startRecorder(undefined, undefined, true)
+    setRecordingUri(await audioRecorderPlayer.startRecorder(undefined, undefined, true))
     audioRecorderPlayer.addRecordBackListener(async e => {
       setMeteringResults(oldMeteringResults => [
         ...oldMeteringResults,
@@ -141,7 +157,6 @@ const AudioRecordOverlay = ({
         await onStopRecording()
       }
     })
-    onAudioRecorded(uri)
   }
 
   return (
@@ -171,11 +186,7 @@ const AudioRecordOverlay = ({
                     .catch(reportError)
                     .finally(() => setIsPressed(true))
                 }
-                onPressOut={() =>
-                  onStopRecording()
-                    .catch(reportError)
-                    .finally(() => setIsPressed(false))
-                }
+                onPressOut={onStopRecording}
                 isPressed={isPressed}
                 testID='record-audio-button'>
                 <MicrophoneIcon width={theme.spacingsPlain.xxl} height={theme.spacingsPlain.xxl} />

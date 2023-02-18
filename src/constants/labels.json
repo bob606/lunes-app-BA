@@ -82,6 +82,10 @@
         "correct": "Toll, weiter so! \nDeine Eingabe ist richtig."
       }
     },
+    "speak": {
+      "title": "Level 4",
+      "description": "Das Wort selber sprechen"
+    },
     "tryLater": "Später versuchen",
     "cheat": {
       "succeed": "Solve All",
@@ -191,6 +195,10 @@
       "enableDevMode": "Enable DevMode",
       "disableDevMode": "Disable DevMode"
     }
+  },
+  "userAudio": {
+    "addAudio": "Eigene Aufnahme erstellen",
+    "retakeAudio": "Eigene Aufnahme neu aufnehmen"
   },
   "userVocabulary": {
     "myWords": "Meine Wörter",

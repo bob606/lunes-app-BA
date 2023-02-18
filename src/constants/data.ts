@@ -11,6 +11,7 @@ export const ExerciseKeys = {
   wordChoiceExercise: 1,
   articleChoiceExercise: 2,
   writeExercise: 3,
+  speakExercise: 4,
 } as const
 export type ExerciseKey = typeof ExerciseKeys[keyof typeof ExerciseKeys]
 
@@ -50,6 +51,13 @@ export const EXERCISES: Readonly<Exercise[]> = [
     description: labels.exercises.write.description,
     level: 3,
     screen: 'WriteExercise',
+  },
+  {
+    key: ExerciseKeys.speakExercise,
+    title: labels.exercises.speak.title,
+    description: labels.exercises.speak.description,
+    level: 4,
+    screen: 'SpeakExercise',
   },
 ] as const
 
@@ -179,8 +187,7 @@ export const FeedbackType = {
 } as const
 export type FeedbackType = typeof FeedbackType[keyof typeof FeedbackType]
 
-export const numberOfMaxRetries = 3
-
+export const numberOfMaxRetries = 2
 export const SCORE_THRESHOLD_POSITIVE_FEEDBACK = 4
 export const SCORE_THRESHOLD_UNLOCK = 2
 
